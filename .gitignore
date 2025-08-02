@@ -1,0 +1,9 @@
+.vscode/
+
+# Dependency directories
+frontend/node_modules/
+backend/node_modules/
+
+# Environment variable files
+frontend/.env
+backend/.env  

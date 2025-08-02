@@ -1,0 +1,87 @@
+import mongoose from 'mongoose';
+
+const productSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, 'Product title is required'],
+      trim: true,
+      min: [3, 'Product title must be at least 3 characters'],
+      max: [100, 'Product title must be at most 100 characters'],
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    code: {
+      type: String,
+      required: [true, 'Product code is required'],
+      trim: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Product category is required'],
+      enum: ["coupon", "voucher", "gift_card", "software_key", "membership", "other"],
+    },
+    company: {
+      type: String,
+      required: [true, 'Company name is required'], // e.g., Amazon, Flipkart
+      trim: true,
+    },
+    price: {
+      type: Number,
+      required: [true, 'Price is required'],
+      min: [0, 'Price must be a positive number'],
+    },
+    // images: {  
+    //   type: [String], // Now stores multiple file paths/URLs
+    //   required: [true, 'Goods information is required'],
+    // },
+    images: [{
+      url: String,
+      public_id: String
+    }],
+    expiryDate: {
+      type: Date,
+      required: [true, 'Expire date is required'],
+    },
+    isOneTimeUse: {
+      type: Boolean,
+      default: true,
+    },
+    usageLimit: {
+      type: Number,
+      default: 1,
+      min: [1, 'Usage limit must be at least 1'],
+    },
+    isSold: {
+      type: Boolean,
+      default: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
+    howToUse: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    termsAndConditions: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Product = mongoose.model('Product', productSchema);
+export default Product;
