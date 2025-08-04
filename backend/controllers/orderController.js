@@ -112,7 +112,7 @@ const orderController = {
         const order = await Order.findByIdAndDelete(id);
         if (!order) {
             throw new ApiError(404, 'Order not found');
-        }
+        } 
 
         cosole.log(`Order with ID ${id} deleted successfully`);
 
