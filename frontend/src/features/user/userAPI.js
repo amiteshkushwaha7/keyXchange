@@ -41,7 +41,7 @@ const userAPI = {
 
   updateAddressAPI: async ({ id, data }) => {
     const res = await api.put(`/users/me/addresses/${id}`, data);
-    return res.data;
+    return res.data; 
   },
 
   deleteAddressAPI: async (id) => {

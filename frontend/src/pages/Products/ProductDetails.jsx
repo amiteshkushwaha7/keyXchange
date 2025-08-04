@@ -1,19 +1,13 @@
 // ProductDetails.jsx
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import OrderButton from '../Order/OrderButton'; // Add this import
 
-const ProductDetails = () => {
+const ProductDetails = () => { 
   const { state } = useLocation();
   const { product, similarProducts } = state || {};
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   if (!product) 
     return <div className="container mx-auto p-4">Product not found</div>;
-
-  const handleBuyNow = async () => {
-    navigate('/orders/create', { state: { product }});
-  };
 
   return (
     <div className="container mx-auto p-4">
@@ -25,12 +19,8 @@ const ProductDetails = () => {
           <p className="text-xl font-bold mb-4">${product.price}</p>
           <p className="mb-4">{product.description || 'No description available'}</p>
 
-          <button
-            onClick={handleBuyNow}
-            className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800"
-          >
-            Buy Now
-          </button>
+          {/* Replace the button with OrderButton */}
+          <OrderButton product={product} />
         </div>
 
         {/* Similar Products */}

@@ -19,7 +19,7 @@ import ProductDetails from './pages/Products/ProductDetails';
 import NotFound from './pages/NotFound/NotFound';
 import LoadingScreen from './components/common/LoadingScreen';
 
-import CreateOrder from './pages/Order/CreateOrder';
+// import CreateOrder from './pages/Order/CreateOrder';
 
 // User components
 import PrivateRoute from './routes/PrivateRoute';
@@ -121,20 +121,15 @@ function App() {
         <Route path="/unauthorized" element={<Unauthorized />} />
 
         <Route path="/products/:id" element={<ProductDetails />} />
-        <Route path="/orders/create" element={<CreateOrder />} />
+        {/* <Route path="/orders/create" element={<CreateOrder />} /> */}
 
 
         {/* User routes */}
         <Route element={<PrivateRoute />}>
           <Route path="/account" element={<AccountLayout />}>
-            {/* <Route index element={<Navigate to="order" replace />} /> */}
+            <Route index element={<Navigate to="my-orders" replace />} />
             <Route path="profile" element={<Profile />} />
-            <Route path="orders" element={<Order />} />
-            {/* <Route path="orders/:id" element={<OrderDetailsPage />} /> */}
-            {/* <Route path="payments" element={<PaymentMethodsPage />} /> */}
-            {/* <Route path="addresses" element={<AddressBookPage />} /> */}
-            {/* <Route path="settings" element={<AccountSettingsPage />} /> */}
-            {/* <Route path="wishlist" element={<WishlistPage />} /> */}
+            <Route path="my-orders" element={<Order />} />
           </Route>
         </Route>
 

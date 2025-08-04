@@ -14,17 +14,20 @@ router.route('/:id')
 
 router.route('/my-orders')
   .get(orderController.getMyOrders);
-
+ 
 router.route('/create')
   .post(orderController.createOrder);
 
 router.route('/verify-payment')
   .post(orderController.verifyPayment);
 
-// router.route('/:id')
+router.route('/:id/status')
+  .patch(authMiddleware.authorize('admin'), orderController.updateOrderStatus);
+
+router.route('/:id')
 //   .get(authMiddleware.protect, orderController.getOrderById)
 //   .put(authMiddleware.protect, authMiddleware.authorize('admin'), orderController.updateOrder)
 //   .delete(authMiddleware.protect, authMiddleware.authorize('admin'), orderController.deleteOrder)
-//   .patch(authMiddleware.protect, authMiddleware.authorize('admin'), orderController.updateOrderStatus);
+  
 
 export default router;

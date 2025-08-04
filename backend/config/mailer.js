@@ -10,6 +10,6 @@ const transporter = nodemailer.createTransport({
         user: process.env.SMPT_USER,
         pass: process.env.SMPT_PASSWORD,
     },
-});
+}); 
 
 export default transporter;

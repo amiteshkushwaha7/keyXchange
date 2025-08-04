@@ -1,7 +1,6 @@
 import api from '../../utils/apiClient';
  
 const adminAPI = {
-
   // Dashboard
   getDashboardStatsAPI: async () => {
     const res = await api.get('/admin/dashboard');
@@ -48,7 +47,7 @@ const adminAPI = {
   getOrderByIdAPI: async (id) => {
     const res = await api.get(`/admin/orders/${id}`);
     return res.data;
-  },
+  }, 
 
   updateOrderAPI: async ({ id, data }) => {
     const res = await api.put(`/admin/orders/${id}`, data);

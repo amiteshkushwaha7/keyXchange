@@ -1,15 +1,16 @@
 // OrderButton.jsx
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createOrder, verifyPayment } from '../../features/orders/orderSlice';
+import { createOrder, verifyPayment, deleteOrder } from '../../features/orders/orderSlice';
 
 const OrderButton = ({ product }) => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.orders);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [transactionDetails, setTransactionDetails] = useState(null);
+  const [createdOrderId, setCreatedOrderId] = useState(null); // Track created order ID
 
-  const handleOrder = async () => {
+  const handleOrder = async () => { 
     try {
       const result = await dispatch(createOrder({
         productId: product._id,
@@ -19,6 +20,7 @@ const OrderButton = ({ product }) => {
 
       const razorpayOrder = result.data.razorpayOrder;
       const createdOrder = result.data.order;
+      setCreatedOrderId(createdOrder._id); // Store the order ID for potential deletion
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -49,6 +51,11 @@ const OrderButton = ({ product }) => {
             setShowSuccessModal(true);
           } catch (err) {
             console.error('Payment verification failed:', err);
+            // Delete the order if verification fails
+            if (createdOrderId) { 
+              const deletedOrder = await dispatch(deleteOrder(createdOrderId));
+              console.log('Order deleted:', deletedOrder);
+            }
             alert('Payment verification failed. Please contact support.');
           }
         },
@@ -63,10 +70,26 @@ const OrderButton = ({ product }) => {
       };
 
       const razorpay = new window.Razorpay(options);
-      razorpay.on('payment.failed', function (response) {
+      
+      razorpay.on('payment.failed', async function (response) {
         console.error('Payment failed:', response.error);
+        // Delete the order on payment failure
+        if (createdOrderId) {
+          const deletedOrder = await dispatch(deleteOrder(createdOrderId));
+          console.log('Order deleted:', deletedOrder);
+        }
         alert(`Payment failed: ${response.error.description}`);
       });
+      
+      razorpay.on('modal.close', async function () {
+        // This handles when user closes the payment modal without completing payment
+        if (razorpay && !razorpay.isPaymentDone && createdOrderId) {
+          const deletedOrder = await dispatch(deleteOrder(createdOrderId));
+          console.log('Order deleted:', deletedOrder);
+          console.log('Order deleted due to modal close without payment');
+        }
+      });
+
       razorpay.open();
 
     } catch (err) {
@@ -102,7 +125,7 @@ const OrderButton = ({ product }) => {
               </button>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-4"> 
               <div className="flex justify-between">
                 <span className="text-gray-600">Product:</span>
                 <span className="font-medium">{transactionDetails.productName}</span>

@@ -10,7 +10,7 @@ const createOrderThunk = (name, apiCall) => createAsyncThunk(
       return response;
     } catch (err) {
       return rejectWithValue(err.response?.data || { message: err.message });
-    }
+    } 
   }
 );
 
@@ -84,6 +84,6 @@ export const {
   clearOrderError,
   clearOrderMessage,
   clearOrderState
-} = orderSlice.actions;
+} = orderSlice.actions; 
 
 export default orderSlice.reducer;

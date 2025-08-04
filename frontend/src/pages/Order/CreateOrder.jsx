@@ -1,20 +1,47 @@
 // CreateOrder.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { createOrder, verifyPayment, deleteOrder } from '../../features/orders/orderSlice';
 
-const CreateOrder = ({ product }) => {
+const CreateOrder = ({ product: productProp }) => {
+    const { state } = useLocation();
+    const product = productProp || state?.product;
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { loading, error } = useSelector((state) => state.orders);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [transactionDetails, setTransactionDetails] = useState(null);
+    const [createdOrderId, setCreatedOrderId] = useState(null);
+
+    useEffect(() => {
+        if (product) {
+            handleOrder();
+        } else {
+            navigate(-1);
+        }
+    }, [product]);
+
+    if (!product) {
+        return (
+            <div className="text-red-500">
+                Product information is missing. Please go back and try again.
+            </div>
+        );
+    }
+
+    const handlePaymentFailure = async (orderId) => {
+        try {
+            if (orderId) {
+                await dispatch(deleteOrder(orderId)).unwrap();
+            }
+        } catch (err) {
+            console.error('Failed to delete order:', err);
+        } finally {
+            // navigate('/product-details', { state: { product } });
+            navigate(-1);
+        }
+    };
 
     const handleOrder = async () => {
-        if (!product) {
-            alert('Product information is missing');
-            return;
-        }
-
         try {
             const result = await dispatch(createOrder({
                 productId: product._id,
@@ -22,7 +49,10 @@ const CreateOrder = ({ product }) => {
                 quantity: product.quantity || 1
             })).unwrap();
 
+            console.log(result);
+
             const { razorpayOrder, order: createdOrder } = result.data;
+            setCreatedOrderId(createdOrder._id);
 
             const options = {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -39,21 +69,12 @@ const CreateOrder = ({ product }) => {
                             razorpayOrderId: razorpayOrder.id,
                             razorpaySignature: response.razorpay_signature
                         })).unwrap();
-
-                        setTransactionDetails({
-                            paymentId: response.razorpay_payment_id,
-                            orderId: razorpayOrder.id,
-                            amount: (razorpayOrder.amount / 100).toFixed(2),
-                            currency: razorpayOrder.currency,
-                            productName: product.title,
-                            date: new Date().toLocaleString(),
-                            status: 'Completed',
-                            ...verificationResult.data
-                        });
-                        setShowSuccessModal(true);
+                        console.log(verificationResult);
+                        // navigate('/product-details', { state: { product } });
+                        navigate(-1);
                     } catch (err) {
                         console.error('Payment verification failed:', err);
-                        alert('Payment verification failed. Please contact support.');
+                        await handlePaymentFailure(createdOrder._id);
                     }
                 },
                 prefill: {
@@ -67,96 +88,39 @@ const CreateOrder = ({ product }) => {
             };
 
             const razorpay = new window.Razorpay(options);
-            
-            razorpay.on('payment.failed', function (response) {
+
+            razorpay.on('payment.failed', async function (response) {
                 console.error('Payment failed:', response.error);
-                alert(`Payment failed: ${response.error.description}`);
+                await handlePaymentFailure(createdOrder._id);
             });
-            
+
+            razorpay.on('payment.cancelled', async function (response) {
+                console.error('Payment cancelled:', response);
+                await handlePaymentFailure(createdOrder._id);
+            });
+
             razorpay.open();
 
         } catch (err) {
             console.error('Order failed:', err);
             alert(`Order creation failed: ${err.message || 'Please try again.'}`);
+            // navigate('/product-details', { state: { product } });
+            navigate(-1);
         }
     };
 
-    const closeModal = () => {
-        setShowSuccessModal(false);
-    };
-
     return (
-        <div className="create-order-container">
-            <button
-                onClick={handleOrder}
-                disabled={loading}
-                className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 transition-colors"
-            >
-                {loading ? 'Processing...' : 'Buy Now'}
-            </button>
-            
-            {error && <p className="text-red-500 mt-2">{error}</p>}
+        <div className="create-order-container p-4">
+            {loading && (
+                <div className="flex flex-col items-center justify-center min-h-[200px]">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black mb-4"></div>
+                    <p>Processing your order...</p>
+                </div>
+            )}
 
-            {/* Success Modal */}
-            {showSuccessModal && transactionDetails && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-md w-full p-6 animate-fade-in">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-2xl font-bold text-green-600">Payment Successful!</h3>
-                            <button
-                                onClick={closeModal}
-                                className="text-gray-500 hover:text-gray-700"
-                                aria-label="Close modal"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            {[
-                                { label: 'Product:', value: transactionDetails.productName },
-                                { 
-                                    label: 'Amount Paid:', 
-                                    value: `${transactionDetails.amount} ${transactionDetails.currency}` 
-                                },
-                                { 
-                                    label: 'Transaction ID:', 
-                                    value: transactionDetails.paymentId,
-                                    highlight: true 
-                                },
-                                { label: 'Order ID:', value: transactionDetails.orderId },
-                                { label: 'Date:', value: transactionDetails.date }
-                            ].map((item, index) => (
-                                <div key={index} className="flex justify-between">
-                                    <span className="text-gray-600">{item.label}</span>
-                                    <span className={`font-medium ${item.highlight ? 'text-blue-600' : ''}`}>
-                                        {item.value}
-                                    </span>
-                                </div>
-                            ))}
-
-                            <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                                <span className="text-gray-600">Status:</span>
-                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800">
-                                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                    {transactionDetails.status}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 flex justify-end">
-                            <button
-                                onClick={closeModal}
-                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                            >
-                                Done 
-                            </button>
-                        </div>
-                    </div>
+            {error && (
+                <div className="text-red-500 mt-2 text-center">
+                    {error}
                 </div>
             )}
         </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux'; 
 import { getAllOrders, updateOrderStatus } from '../../features/admin/adminSlice';
 
 import OrdersTable from '../../components/admin/Order/OrdersTable';
@@ -8,7 +8,7 @@ import OrderDetailsModal from '../../components/admin/Order/OrderDetailsModal';
 import SearchInput from '../../components/admin/Common/SeachInput';
 import StatusFilter from '../../components/admin/Common/StatusFilter';
 
-const Orders = () => {
+const Orders = () => { 
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();

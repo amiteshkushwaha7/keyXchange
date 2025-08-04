@@ -184,7 +184,7 @@ const adminSlice = createSlice({
         ? action.payload
         : action.payload.data || [];
       state.message = action.payload.message;
-    });
+    }); 
 
     // Users
     addCommonCases(getAllUsers, 'users');

@@ -45,7 +45,7 @@ const initialState = {
   addresses: [],
   addressesLoading: false,
   addressesError: null,
-  
+   
   // General
   message: null
 };
