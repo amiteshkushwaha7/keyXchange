@@ -9,7 +9,7 @@ const UserDetailsModal = ({ isOpen, userId, onClose }) => {
   const user = useMemo(
     () => users.find((u) => u._id === userId),
     [userId, users]
-  );
+  ); 
 
   const isLoading = useSelector(state => state.admin.usersLoading);
 

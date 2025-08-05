@@ -1,19 +1,16 @@
 import express from 'express';
 import authMiddleware from '../middlewares/authMiddleware.js';
-import userController from '../controllers/userController.js';  
+import customerController from '../controllers/customerController.js' 
 
 const router = express.Router();
 
-//User routes
 router.use(authMiddleware.protect);
-
-// Admin routes
 router.use(authMiddleware.authorize('admin'));
 
 router.route('/')
-  .get(userController.getAllUsers);
+  .get(customerController.getAllCustomers);
 
 router.route('/:id')
-  .get(userController.getUserById);
+  .get(customerController.getCustomerWithOrders);
 
 export default router;

@@ -68,9 +68,9 @@ const adminAPI = {
   getAllCustomersAPI: async (params = {}) => {
     const res = await api.get('/admin/customers', { params });
     return res.data;
-  },
+  }, 
 
-  getCustomerByIdAPI: async (id) => {
+  getCustomerWithOrdersAPI: async (id) => {
     const res = await api.get(`/admin/customers/${id}`);
     return res.data;
   },

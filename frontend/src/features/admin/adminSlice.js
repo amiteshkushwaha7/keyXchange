@@ -28,12 +28,12 @@ export const searchProducts = createAdminThunk('searchProducts', adminAPI.search
 export const getAllOrders = createAdminThunk('getAllOrders', adminAPI.getAllOrdersAPI);
 export const getOrderById = createAdminThunk('getOrderById', adminAPI.getOrderByIdAPI);
 export const updateOrder = createAdminThunk('updateOrder', adminAPI.updateOrderAPI);
-export const deleteOrder = createAdminThunk('deleteOrder', adminAPI.deleteOrderAPI);  
+export const deleteOrder = createAdminThunk('deleteOrder', adminAPI.deleteOrderAPI);
 export const updateOrderStatus = createAdminThunk('updateOrderStatus', adminAPI.updateOrderStatusAPI);
 
 // Customers
 export const getAllCustomers = createAdminThunk('getAllCustomers', adminAPI.getAllCustomersAPI);
-export const getCustomerById = createAdminThunk('getCustomerById', adminAPI.getCustomerByIdAPI);
+export const getCustomerWithOrders = createAdminThunk('getCustomerWithOrders', adminAPI.getCustomerWithOrdersAPI);
 
 // Users
 export const getAllUsers = createAdminThunk('getAllUsers', adminAPI.getAllUsersAPI);
@@ -55,19 +55,18 @@ const initialState = {
   ordersError: null,
 
   // Customers
+  customer: null, 
   customers: [],
   customersLoading: false,
-  customersError: null,
+  customerOrders: [],
+  customerOrdersLoading: false,
+  customerBoughtProducts: [],
+  customerOrdersError: null,
 
   // Users
   users: [],
   usersLoading: false,
   usersError: null,
-
-  // Dashboard
-  dashboardStats: null,
-  dashboardLoading: false,
-  dashboardError: null,
 
   // General
   message: null
@@ -83,6 +82,7 @@ const adminSlice = createSlice({
       state.customersError = null;
       state.usersError = null;
       state.dashboardError = null;
+      state.customerOrdersError = null;
     },
     clearAdminMessage: (state) => {
       state.message = null;
@@ -184,7 +184,16 @@ const adminSlice = createSlice({
         ? action.payload
         : action.payload.data || [];
       state.message = action.payload.message;
-    }); 
+    });
+
+    addCommonCases(getCustomerWithOrders, 'customerOrders');
+    builder.addCase(getCustomerWithOrders.fulfilled, (state, action) => {
+      state.customerOrdersLoading = false;
+      state.customer = action.payload?.data?.customer || null;
+      state.customerOrders = action.payload?.data?.orders || [];
+      state.customerBoughtProducts = action.payload?.data?.boughtProducts || [];
+      state.message = action.payload.message;
+    });
 
     // Users
     addCommonCases(getAllUsers, 'users');
@@ -193,14 +202,6 @@ const adminSlice = createSlice({
       state.users = Array.isArray(action.payload)
         ? action.payload
         : action.payload.data || [];
-      state.message = action.payload.message;
-    });
-
-    // Dashboard
-    addCommonCases(getDashboardStats, 'dashboard');
-    builder.addCase(getDashboardStats.fulfilled, (state, action) => {
-      state.dashboardLoading = false;
-      state.dashboardStats = action.payload;
       state.message = action.payload.message;
     });
   }

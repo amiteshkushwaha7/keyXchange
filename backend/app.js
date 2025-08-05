@@ -10,6 +10,7 @@ import authRouter from './routes/authRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import customerRoutes from './routes/customerRoutes.js'; 
 
 dotenv.config();
 const app = express();
@@ -34,6 +35,8 @@ app.use('/api/v1/admin/products', productRoutes);
 
 app.use('/api/v1/admin/users', userRoutes);
 app.use('/api/v1/users', userRoutes);
+
+app.use('/api/v1/admin/customers', customerRoutes);
 
 app.use('/api/v1/orders', orderRouter);
 app.use('/api/v1/admin/orders', orderRouter);

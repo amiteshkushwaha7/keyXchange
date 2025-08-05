@@ -6,9 +6,9 @@ import UsersTable from '../../components/admin/User/UsersTable';
 import UserDetailsModal from '../../components/admin/User/UserDetailsModal';
 import SearchInput from '../../components/admin/Common/SeachInput';
 
-const Users = () => {
+const Users = () => { 
   const { id } = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const dispatch = useDispatch();
   const { users, usersLoading } = useSelector(state => state.admin);
 
@@ -68,7 +68,7 @@ const Users = () => {
         }}
       />
     </div>
-  );
+  ); 
 };
 
 export default Users;
