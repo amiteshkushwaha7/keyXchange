@@ -6,11 +6,67 @@ import cloudinary from '../config/cloudinary.js';
 
 const productController = {
 
+    // createProduct: catchAsync(async (req, res) => {
+    //     const {
+    //         title,
+    //         description,
+    //         howToUse,
+    //         termsAndConditions,
+    //         code,
+    //         category,
+    //         company,
+    //         price,
+    //         expiryDate,
+    //         isOneTimeUse,
+    //         usageLimit,
+    //         stock,
+    //         isSold,
+    //         isActive
+    //     } = req.body;
+
+    //     console.log(req.body);
+
+    //     const images = req.files?.map(file => ({
+    //         url: file.path,
+    //         public_id: file.filename
+    //     })) || [];
+
+    //     const product = await Product.create({
+    //         title,
+    //         description,
+    //         howToUse,
+    //         termsAndConditions,
+    //         code,
+    //         category,
+    //         company,
+    //         price,
+    //         expiryDate,
+    //         isOneTimeUse,
+    //         usageLimit,
+    //         stock,
+    //         isSold,
+    //         isActive,
+    //         images,
+    //         uploadedBy: req.user._id
+    //     });
+
+    //     console.log(product);
+
+    //     new ApiResponse({
+    //         statusCode: 201,
+    //         message: 'Product created successfully',
+    //         data: product
+    //     }).send(res);
+    // }),
+
+    // READ All Products
+
     createProduct: catchAsync(async (req, res) => {
         const {
             title,
-            description,
-            howToUse,
+            subtitle,
+            details,
+            howToRedeem,
             termsAndConditions,
             code,
             category,
@@ -19,22 +75,22 @@ const productController = {
             expiryDate,
             isOneTimeUse,
             usageLimit,
-            stock,
             isSold,
             isActive
         } = req.body;
 
-        console.log(req.body);
-
+        // Process images from uploaded files
         const images = req.files?.map(file => ({
             url: file.path,
             public_id: file.filename
         })) || [];
 
+        // Create product with matching fields from schema
         const product = await Product.create({
             title,
-            description,
-            howToUse,
+            subtitle,
+            details,
+            howToRedeem,
             termsAndConditions,
             code,
             category,
@@ -43,14 +99,11 @@ const productController = {
             expiryDate,
             isOneTimeUse,
             usageLimit,
-            stock,
             isSold,
             isActive,
             images,
             uploadedBy: req.user._id
         });
-
-        console.log(product);
 
         new ApiResponse({
             statusCode: 201,
@@ -59,7 +112,7 @@ const productController = {
         }).send(res);
     }),
 
-    // READ All Products
+
     getAllProducts: catchAsync(async (req, res) => {
         const products = await Product.find();
         if (!products || products.length === 0) {
@@ -109,70 +162,141 @@ const productController = {
 
 
     // UPDATE Product
+    // updateProduct: catchAsync(async (req, res) => {
+    //     const product = await Product.findById(req.params.id);
+    //     if (!product) {
+    //         throw new ApiError(404, 'Product not found');
+    //     }
+
+    //     // Debug: log the entire request to see what's coming in
+    //     console.log('Full request:', {
+    //         // params: req.params,
+    //         body: req,
+    //         // files: req.files
+    //     });
+
+    //     // Delete old files if new files uploaded
+    //     if (req.files && req.files.length > 0) {
+    //         for (const file of product.images) {
+    //             try {
+    //                 await cloudinary.uploader.destroy(file.public_id);
+    //             } catch (err) {
+    //                 console.warn('Cloudinary delete failed:', file.public_id, err.message);
+    //             }
+    //         }
+
+    //         product.images = req.files.map(file => ({
+    //             url: file.path,
+    //             public_id: file.filename
+    //         }));
+    //     }
+
+    //     // Handle the request body - ensure it exists
+    //     const updateData = req.body || {};
+
+    //     const fields = [
+    //         'title', 'description', 'code', 'category',
+    //         'company', 'price', 'expiryDate',
+    //         'isOneTimeUse', 'usageLimit', 'isActive',
+    //         'howToUse', 'termsAndConditions'
+    //     ];
+
+    //     fields.forEach(field => {
+    //         if (Object.prototype.hasOwnProperty.call(updateData, field)) {
+    //             // Only update if the field exists in updateData
+    //             // Handle boolean fields specifically
+    //             if (field === 'isActive' || field === 'isOneTimeUse') {
+    //                 product[field] = updateData[field] === 'true' || updateData[field] === true;
+    //             } else {
+    //                 product[field] = updateData[field];
+    //             }
+    //         }
+    //     }); 
+
+    //     await product.save();
+
+    //     new ApiResponse({
+    //         statusCode: 200,
+    //         message: 'Product updated successfully',
+    //         data: product
+    //     }).send(res);
+    // }),
+
     updateProduct: catchAsync(async (req, res) => {
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            throw new ApiError(404, 'Product not found');
-        }
+        // const product = await Product.findById(req.params.id);
+        // console.log(product);
 
-        // Debug: log the entire request to see what's coming in
-        console.log('Full request:', {
-            // params: req.params,
-            body: req,
-            // files: req.files
-        });
+        // if (!product) {
+        //     throw new ApiError(404, 'Product not found');
+        // }
 
-        // Delete old files if new files uploaded
-        if (req.files && req.files.length > 0) {
-            for (const file of product.images) {
-                try {
-                    await cloudinary.uploader.destroy(file.public_id);
-                } catch (err) {
-                    console.warn('Cloudinary delete failed:', file.public_id, err.message);
-                }
-            }
+        // Delete associated files from Cloudinary
+        // for (const file of product.images) {
+        //     try {
+        //         await cloudinary.uploader.destroy(file.public_id);
+        //     } catch (err) {
+        //         console.warn('Cloudinary delete failed:', file.public_id, err.message);
+        //     }
+        // }
 
-            product.images = req.files.map(file => ({
-                url: file.path,
-                public_id: file.filename
-            }));
-        }
+        // await Product.findByIdAndDelete(req.params.id);
 
-        // Handle the request body - ensure it exists
-        const updateData = req.body || {};
+        // console.log(req);
 
-        const fields = [
-            'title', 'description', 'code', 'category',
-            'company', 'price', 'expiryDate',
-            'isOneTimeUse', 'usageLimit', 'isActive',
-            'howToUse', 'termsAndConditions'
-        ];
+        // const {
+        //     title,
+        //     subtitle,
+        //     details,
+        //     howToRedeem,
+        //     termsAndConditions,
+        //     code,
+        //     category,
+        //     company,
+        //     price,
+        //     expiryDate,
+        //     isOneTimeUse,
+        //     usageLimit,
+        //     isSold,
+        //     isActive
+        // } = req.body;
 
-        fields.forEach(field => {
-            if (Object.prototype.hasOwnProperty.call(updateData, field)) {
-                // Only update if the field exists in updateData
-                // Handle boolean fields specifically
-                if (field === 'isActive' || field === 'isOneTimeUse') {
-                    product[field] = updateData[field] === 'true' || updateData[field] === true;
-                } else {
-                    product[field] = updateData[field];
-                }
-            }
-        });
+        // Process images from uploaded files
+        // const images = req.files?.map(file => ({
+        //     url: file.path,
+        //     public_id: file.filename
+        // })) || [];
 
-        await product.save();
-
+        // Create product with matching fields from schema
+        // const newProduct = await Product.create({
+        //     title,
+        //     subtitle,
+        //     details,
+        //     howToRedeem,
+        //     termsAndConditions,
+        //     code,
+        //     category,
+        //     company,
+        //     price,
+        //     expiryDate,
+        //     isOneTimeUse,
+        //     usageLimit,
+        //     isSold,
+        //     isActive,
+        //     images,
+        //     uploadedBy: req.user._id
+        // });
+        
         new ApiResponse({
             statusCode: 200,
             message: 'Product updated successfully',
-            data: product
+            // data: newProduct
         }).send(res);
     }),
 
     // DELETE Product
     deleteProduct: catchAsync(async (req, res) => {
         const product = await Product.findById(req.params.id);
-        console.log(product);
+
         if (!product) {
             throw new ApiError(404, 'Product not found');
         }

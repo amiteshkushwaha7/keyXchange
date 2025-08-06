@@ -24,7 +24,7 @@ const adminAPI = {
   },
 
   updateProductAPI: async ({ id, data }) => {
-    const res = await api.put(`/admin/products/${id}`, data);
+    const res = await api.post(`/admin/products/${id}`, data);
     return res.data;
   },
 

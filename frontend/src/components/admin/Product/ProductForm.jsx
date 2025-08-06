@@ -1,23 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { createProduct, updateProduct } from '../../../features/admin/adminSlice';
 
 const ProductForm = ({ product, isLoading, onSuccess }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
- 
   const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false); 
- 
+  const [submitting, setSubmitting] = useState(false);
+  
   const [formData, setFormData] = useState({
     title: '',
+    subtitle: '',
+    details: [''],
     code: '',
     category: '',
     company: '',
-    description: '',
-    howToUse: '',
-    termsAndConditions: '',
+    howToRedeem: [''],
+    termsAndConditions: [''],
     price: '',
     usageLimit: 1,
     expiryDate: '',
@@ -30,15 +28,16 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
     if (product) {
       setFormData({
         title: product.title || '',
-        description: product.description || '',
-        howToUse: product.howToUse || '',
-        termsAndConditions: product.termsAndConditions || '',
+        subtitle: product.subtitle || '',
+        details: product.details?.length ? [...product.details] : [''],
         code: product.code || '',
         category: product.category || '',
         company: product.company || '',
+        howToRedeem: product.howToRedeem?.length ? [...product.howToRedeem] : [''],
+        termsAndConditions: product.termsAndConditions?.length ? [...product.termsAndConditions] : [''],
         price: product.price || '',
-        images: product.files ? (Array.isArray(product.files) ? product.files : [product.files]) : [],
-        expiryDate: product.expiryDate || '',
+        images: product.images || [],
+        expiryDate: product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : '',
         isOneTimeUse: product.isOneTimeUse !== false,
         usageLimit: product.usageLimit || 1,
         isActive: product.isActive !== false,
@@ -51,6 +50,31 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleArrayFieldChange = (fieldName, index, value) => {
+    setFormData(prev => {
+      const newArray = [...prev[fieldName]];
+      newArray[index] = value;
+      return {
+        ...prev,
+        [fieldName]: newArray
+      };
+    });
+  };
+
+  const addArrayFieldItem = (fieldName) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: [...prev[fieldName], '']
+    }));
+  };
+
+  const removeArrayFieldItem = (fieldName, index) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].filter((_, i) => i !== index)
     }));
   };
 
@@ -69,10 +93,7 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true); // <-- Add this line
-
+  const validateForm = () => {
     const newErrors = {};
 
     if (!formData.title || formData.title.length < 3 || formData.title.length > 100) {
@@ -95,57 +116,69 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
       newErrors.price = 'Price must be a positive number';
     }
 
-    // Expiry date validation: compare only date part
     if (!formData.expiryDate) {
-      newErrors.expiryDate = 'Expiry date is required and must be in the future';
+      newErrors.expiryDate = 'Expiry date is required';
     }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setSubmitting(false); // <-- Add this line
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    if (!validateForm()) {
+      setSubmitting(false);
       return;
     }
 
-    setErrors({});
-
     const formDataToSend = new FormData();
 
-    // Append all non-file fields
+    // Append all non-file and non-array fields
     Object.entries(formData).forEach(([key, value]) => {
-      if (key !== 'images') {
+      if (key !== 'images' && !Array.isArray(value)) {
         formDataToSend.append(key, value == null ? '' : String(value));
       }
     });
 
-    // Append files
-    formData.images.forEach((file) => {
-      formDataToSend.append('images', file);  // Field name must match multer config
+    // Append array fields
+    ['details', 'howToRedeem', 'termsAndConditions'].forEach(field => {
+      formData[field].forEach((item, index) => {
+        if (item.trim() !== '') {
+          formDataToSend.append(`${field}[${index}]`, item);
+        }
+      });
     });
 
-    // Debug what's being sent
-    for (let [key, value] of formDataToSend.entries()) {
-      console.log(key, value);
-    }
+    // Append files
+    formData.images.forEach((file) => {
+      formDataToSend.append('images', file);
+    });
+
+    console.log(formDataToSend); // this is not printing any data
+    console.log(formData); // this print data
 
     try {
       if (product && product._id) {
-        await dispatch(updateProduct({ id: product._id, formDataToSend })).unwrap();
+        await dispatch(updateProduct(formDataToSend)).unwrap();
       } else {
         await dispatch(createProduct(formDataToSend)).unwrap();
       }
-      onSuccess(); 
+      onSuccess();
     } catch (error) {
       console.error('Error submitting product form:', error);
       if (error.errors) {
+        const serverErrors = {};
         Object.entries(error.errors).forEach(([field, { message }]) => {
-          alert(`${field}: ${message}`);
+          serverErrors[field] = message;
         });
+        setErrors(serverErrors);
       } else {
-        console.error('Error submitting product form:', error);
         alert('Failed to save product. Please try again.');
       }
     } finally {
-      setSubmitting(false); // <-- Add this line
+      setSubmitting(false);
     }
   };
 
@@ -158,6 +191,42 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
     'other'
   ];
 
+  const renderArrayField = (fieldName, label, placeholder) => {
+    return (
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">{label}</label>
+        {formData[fieldName].map((item, index) => (
+          <div key={index} className="flex items-center gap-2 mb-2">
+            <textarea
+              value={item}
+              onChange={(e) => handleArrayFieldChange(fieldName, index, e.target.value)}
+              rows={2}
+              maxLength={500}
+              className="flex-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+              placeholder={placeholder}
+            />
+            {formData[fieldName].length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeArrayFieldItem(fieldName, index)}
+                className="text-red-500 hover:text-red-700 text-sm"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => addArrayFieldItem(fieldName)}
+          className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+        >
+          + Add another
+        </button>
+      </div>
+    );
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-white shadow-sm rounded-lg p-6">
@@ -165,27 +234,27 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Product Title*</label>
-            <input 
-              type="text" 
-              name="title" 
-              value={formData.title} 
-              onChange={handleChange} 
-              required 
-              minLength={3} 
-              maxLength={100} 
-              className={`block w-full rounded-md ${errors.title ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`} 
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              minLength={3}
+              maxLength={100}
+              className={`block w-full rounded-md ${errors.title ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`}
             />
             {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Product Code*</label>
-            <input 
-              type="text" 
-              name="code" 
-              value={formData.code} 
-              onChange={handleChange} 
-              required 
-              className={`block w-full rounded-md ${errors.code ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`} 
+            <input
+              type="text"
+              name="code"
+              value={formData.code}
+              onChange={handleChange}
+              required
+              className={`block w-full rounded-md ${errors.code ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`}
             />
             {errors.code && <p className="mt-1 text-sm text-red-600">{errors.code}</p>}
           </div>
@@ -193,123 +262,166 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Category*</label>
-            <select 
-              name="category" 
-              value={formData.category} 
-              onChange={handleChange} 
-              required 
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
               className={`block w-full rounded-md ${errors.category ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`}
             >
               <option value="">Select a category</option>
               {categories.map(cat => (
-                <option key={cat} value={cat}>{cat.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</option>
+                <option key={cat} value={cat}>
+                  {cat.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                </option>
               ))}
             </select>
             {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category}</p>}
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Company*</label>
-            <input 
-              type="text" 
-              name="company" 
-              value={formData.company} 
-              onChange={handleChange} 
-              required 
-              className={`block w-full rounded-md ${errors.company ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`} 
+            <input
+              type="text"
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
+              required
+              className={`block w-full rounded-md ${errors.company ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`}
             />
             {errors.company && <p className="mt-1 text-sm text-red-600">{errors.company}</p>}
           </div>
         </div>
         <div className="mt-4 space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Description</label>
-          <textarea name="description" value={formData.description} onChange={handleChange} rows={3} className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" />
+          <label className="block text-sm font-medium text-gray-700">Subtitle</label>
+          <input
+            type="text"
+            name="subtitle"
+            value={formData.subtitle}
+            onChange={handleChange}
+            maxLength={100}
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+          />
         </div>
+        {renderArrayField('details', 'Details', 'Product details')}
       </div>
+
       <div className="bg-white shadow-sm rounded-lg p-6">
         <h2 className="text-lg font-medium mb-4">Usage Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">How to Use</label>
-            <textarea name="howToUse" value={formData.howToUse} onChange={handleChange} rows={3} className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" placeholder="Instructions for using the product" />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Terms and Conditions</label>
-            <textarea name="termsAndConditions" value={formData.termsAndConditions} onChange={handleChange} rows={3} className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" placeholder="Any restrictions or conditions for use" />
-          </div>
+        <div className="space-y-6">
+          {renderArrayField('howToRedeem', 'How to Redeem', 'Instructions for redeeming the product')}
+          {renderArrayField('termsAndConditions', 'Terms and Conditions', 'Any restrictions or conditions for use')}
         </div>
       </div>
+
       <div className="bg-white shadow-sm rounded-lg p-6">
         <h2 className="text-lg font-medium mb-4">Pricing & Inventory</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Price*</label>
-            <input 
-              type="number" 
-              name="price" 
-              value={formData.price} 
-              onChange={handleChange} 
-              min="0" 
-              step="0.01" 
-              required 
-              className={`block w-full rounded-md ${errors.price ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`} 
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              min="0"
+              step="0.01"
+              required
+              className={`block w-full rounded-md ${errors.price ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`}
             />
             {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Usage Limit*</label>
-            <input type="number" name="usageLimit" value={formData.usageLimit} onChange={handleChange} min="1" required className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" />
+            <input
+              type="number"
+              name="usageLimit"
+              value={formData.usageLimit}
+              onChange={handleChange}
+              min="1"
+              required
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+            />
           </div>
         </div>
       </div>
+
       <div className="bg-white shadow-sm rounded-lg p-6">
         <h2 className="text-lg font-medium mb-4">Files & Expiry</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Expiry Date*</label>
-            <input 
-              type="date" 
-              name="expiryDate" 
-              value={formData.expiryDate ? new Date(formData.expiryDate).toISOString().split('T')[0] : ''} 
-              onChange={handleChange} 
-              required 
-              min={(() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })()} 
-              className={`block w-full rounded-md ${errors.expiryDate ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`} 
+            <input
+              type="date"
+              name="expiryDate"
+              value={formData.expiryDate}
+              onChange={handleChange}
+              required
+              min={new Date().toISOString().split('T')[0]}
+              className={`block w-full rounded-md ${errors.expiryDate ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`}
             />
             {errors.expiryDate && <p className="mt-1 text-sm text-red-600">{errors.expiryDate}</p>}
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Files*</label>
-            <input 
-              type="file" 
-              onChange={handleFileChange} 
+            <label className="block text-sm font-medium text-gray-700">Images</label>
+            <input
+              type="file"
+              onChange={handleFileChange}
               multiple
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
+              accept="image/*"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-            {errors.images && <p className="mt-1 text-sm text-red-600">{errors.images}</p>}
             <div className="mt-2 space-y-2">
               {formData.images.map((file, index) => (
                 <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm text-gray-600 truncate max-w-xs">{file.name || (typeof file === 'string' ? file.split('/').pop() : 'File')}</span>
-                  <button type="button" onClick={() => removeFile(index)} className="ml-2 text-red-500 hover:text-red-700 text-sm font-medium">Remove</button>
+                  <span className="text-sm text-gray-600 truncate max-w-xs">
+                    {file.name || (typeof file === 'string' ? file.split('/').pop() : 'Image')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    className="ml-2 text-red-500 hover:text-red-700 text-sm font-medium"
+                  >
+                    Remove
+                  </button>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </div>
+
       <div className="bg-white shadow-sm rounded-lg p-6">
         <h2 className="text-lg font-medium mb-4">Status Settings</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="flex items-center">
-            <input type="checkbox" id="isOneTimeUse" name="isOneTimeUse" checked={formData.isOneTimeUse} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-            <label htmlFor="isOneTimeUse" className="ml-2 block text-sm text-gray-700">One Time Use</label>
+            <input
+              type="checkbox"
+              id="isOneTimeUse"
+              name="isOneTimeUse"
+              checked={formData.isOneTimeUse}
+              onChange={handleChange}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="isOneTimeUse" className="ml-2 block text-sm text-gray-700">
+              One Time Use
+            </label>
           </div>
           <div className="flex items-center">
-            <input type="checkbox" id="isActive" name="isActive" checked={formData.isActive} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">Active</label>
+            <input
+              type="checkbox"
+              id="isActive"
+              name="isActive"
+              checked={formData.isActive}
+              onChange={handleChange}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+              Active
+            </label>
           </div>
         </div>
       </div>
+
       <div className="flex justify-end pt-4">
         <button
           type="submit"

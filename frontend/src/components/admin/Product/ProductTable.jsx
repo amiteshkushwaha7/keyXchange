@@ -22,6 +22,17 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
     setShowImageModal(true);
   };
 
+  const renderArrayField = (items) => {
+    if (!items || items.length === 0) return 'N/A';
+    return (
+      <ul className="list-disc pl-5 space-y-1">
+        {items.map((item, index) => (
+          <li key={index} className="text-sm text-gray-900">{item}</li>
+        ))}
+      </ul>
+    );
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-6 h-full">
       {/* Image Modal */}
@@ -58,7 +69,7 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
                 <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Image</th>
                 <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</th>
                 <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stock/Use Limite</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Usage Limit</th>
                 <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
               </tr>
             </thead>
@@ -128,7 +139,7 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
             <p className="mt-1 text-sm text-gray-500">Get started by adding a new product.</p>
           </div>
         )}
-      </div>
+      </div> 
 
       {/* Product Detail Panel */}
       {isDetailOpen && selectedProduct && (
@@ -136,7 +147,6 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
           <div className="p-6">
             <div className="flex justify-between items-start mb-6">
               <h2 className="text-2xl font-bold text-gray-800">{selectedProduct.title}</h2>
-              {/* Always show close button */}
               <button
                 onClick={closeDetail}
                 className="text-gray-400 hover:text-gray-600"
@@ -167,8 +177,8 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Description</h3>
-                  <p className="mt-1 text-sm text-gray-900">{selectedProduct.description}</p>
+                  <h3 className="text-sm font-medium text-gray-500">Subtitle</h3>
+                  <p className="mt-1 text-sm text-gray-900">{selectedProduct.subtitle || 'N/A'}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Product Code</h3>
@@ -187,13 +197,18 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
                 </div>
               </div>
 
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Details</h3>
+                {renderArrayField(selectedProduct.details)}
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Price</h3>
                   <p className="mt-1 text-sm text-gray-900">₹{selectedProduct.price.toFixed(2)}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Stock/Usage Limit</h3>
+                  <h3 className="text-sm font-medium text-gray-500">Usage Limit</h3>
                   <p className="mt-1 text-sm text-gray-900">{selectedProduct.usageLimit}</p>
                 </div>
               </div>
@@ -206,13 +221,13 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
               </div>
  
               <div>
-                <h3 className="text-sm font-medium text-gray-500">How To Use</h3>
-                <p className="mt-1 text-sm text-gray-900">{selectedProduct.howToUse || 'N/A'}</p>
+                <h3 className="text-sm font-medium text-gray-500">How To Redeem</h3>
+                {renderArrayField(selectedProduct.howToRedeem)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Terms & Conditions</h3>
-                <p className="mt-1 text-sm text-gray-900">{selectedProduct.termsAndConditions || 'N/A'}</p>
+                {renderArrayField(selectedProduct.termsAndConditions)}
               </div>
 
               <div className="grid grid-cols-3 gap-4">

@@ -8,7 +8,7 @@ import ProductTable from '../../components/admin/Product/ProductTable';
 import ProductForm from '../../components/admin/Product/ProductForm';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
-
+ 
 const Products = () => {
   const { id } = useParams(); 
   const navigate = useNavigate();

@@ -100,7 +100,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.message = 'Logged out successfully';
     });
-
+ 
     // Load User
     addCommonCases(loadUser);
     builder.addCase(loadUser.fulfilled, (state, action) => {

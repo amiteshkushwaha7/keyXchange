@@ -4,7 +4,7 @@ const productAPI = {
 
   getAllProductsAPI: async (params = {}) => {
     const res = await api.get('/products', { params });
-    return res.data;
+    return res.data; 
   },
 
   getProductByIdAPI: async (id) => { 

@@ -10,7 +10,7 @@ const router = express.Router();
 router.use(authMiddleware.protect);
 router.use(authMiddleware.authorize('admin'));
 
-// Dashboard
+// Dashboard 
 router.route('/dashboard')
   .get(adminController.getDashboardStats);
 

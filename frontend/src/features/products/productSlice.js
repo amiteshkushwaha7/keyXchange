@@ -50,7 +50,7 @@ const productSlice = createSlice({
       state.error = null;
       state.message = null;
     }
-  },
+  }, 
   extraReducers: (builder) => {
     // Helper function for common pending/rejected cases
     const addCommonCases = (thunk) => {
@@ -93,10 +93,11 @@ const productSlice = createSlice({
     addCommonCases(updateProduct);
     builder.addCase(updateProduct.fulfilled, (state, action) => {
       state.loading = false;
-      state.products = state.products.map(product => 
-        product._id === action.payload._id ? action.payload : product
-      );
-      state.currentProduct = action.payload;
+      // state.products = state.products.map(product => 
+      //   product._id === action.payload._id ? action.payload : product
+      // );
+      state.products.unshift(action.payload);
+      // state.currentProduct = action.payload;
       state.message = action.payload.message;
     });
 

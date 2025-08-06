@@ -153,7 +153,7 @@ const authController = {
         const user = await User.findById(req.user._id).select("-password -refreshToken");
         return new ApiResponse({
             statusCode: 200,
-            message: "User retrieved successfully",
+            message: "User retrieved successfully", 
             data: {
                 // accessToken: req.headers.authorization?.split(' ')[1] || null,
                 accessToken: req.cookies.accessToken || req.headers.authorization?.split(' ')[1],
@@ -249,101 +249,6 @@ const authController = {
         );
     }),
 
-    // isLoggedIn: async (req, res, next) => {
-    //     if (req.cookies.jwt) {
-    //         try {
-    //             const decoded = await promisify(jwt.verify)(
-    //                 req.cookies.jwt,
-    //                 process.env.JWT_SECRET
-    //             );
-
-    //             const currentUser = await User.findById(decoded.id);
-    //             if (!currentUser || currentUser.changedPasswordAfter(decoded.iat)) {
-    //                 return next();
-    //             }
-
-    //             res.locals.user = currentUser;
-    //             return next();
-    //         } catch (err) {
-    //             return next();
-    //         }
-    //     }
-    //     next();
-    // },
-
-    // restrictTo: (...roles) => {
-    //     return (req, res, next) => {
-    //         if (!roles.includes(req.user.role)) {
-    //             return next(
-    //                 new ApiError('You do not have permission to perform this action', 403)
-    //             );
-    //         }
-
-    //         next();
-    //     };
-    // },
-
-    // forgotPassword: catchAsync(async (req, res) => {
-    //     const user = await User.findOne({ email: req.body.email });
-    //     if (!user) {
-    //         return next(new ApiError('There is no user with this email address.', 404));
-    //     }
-
-    //     const resetToken = user.createPasswordResetToken();
-    //     await user.save({ validateBeforeSave: false });
-
-    //     const resetURL = `${req.protocol}://${req.get(
-    //         'host'
-    //     )}/api/v1/users/resetPassword/${resetToken}`;
-
-    //     const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
-
-    //     try {
-    //         await sendEmail({
-    //             email: user.email,
-    //             subject: 'Your password reset token (valid for 10 min)',
-    //             message,
-    //         });
-
-    //         res.status(200).json({
-    //             status: 'success',
-    //             message: 'Token sent to email!',
-    //         });
-    //     } catch (err) {
-    //         user.passwordResetToken = undefined;
-    //         user.passwordResetExpires = undefined;
-    //         await user.save({ validateBeforeSave: false });
-
-    //         return next(
-    //             new ApiError('There was an error sending the email. Try again later!', 500)
-    //         );
-    //     }
-    // }),
-
-    // resetPassword: catchAsync(async (req, res, next) => {
-    //     const hashedToken = crypto
-    //         .createHash('sha256')
-    //         .update(req.params.token)
-    //         .digest('hex');
-
-    //     const user = await User.findOne({
-    //         passwordResetToken: hashedToken,
-    //         passwordResetExpires: { $gt: Date.now() },
-    //     });
-
-    //     if (!user) {
-    //         return next(new ApiError('Token is invalid or has expired', 400));
-    //     }
-
-    //     user.password = req.body.password;
-    //     user.passwordConfirm = req.body.passwordConfirm;
-    //     user.passwordResetToken = undefined;
-    //     user.passwordResetExpires = undefined;
-    //     await user.save();
-
-    //     createSendToken(user, 200, res);
-    // }),
-
     updatePassword: catchAsync(async (req, res) => {
         const user = await User.findById(req.user._id).select('+password');
 
@@ -352,8 +257,8 @@ const authController = {
         }
 
         user.password = req.body.newPassword;
-        user.passwordConfirm = req.body.newPasswordConfirm;
-        await user.save();
+
+        await user.save({ validateBeforeSave: false });
 
         return new ApiResponse({
             statusCode: 200,

@@ -40,7 +40,6 @@ const validate = {
             errors.role = 'Role must be either user or admin';
 
         if (Object.keys(errors).length > 0) {
-            // console.log(errors);
             return next(new ApiError(400, 'Validation Error', errors));
         }
 
@@ -59,6 +58,26 @@ const validate = {
 
         if (Object.keys(errors).length > 0) {
             // console.log(errors);
+            return next(new ApiError(400, 'Validation Error', errors));
+        }
+        next();
+    },
+
+    updatePasswordInput: (req, res, next) => {
+        const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+        const errors = {};
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        if (!currentPassword || currentPassword.trim() === '')
+            errors.currentPassword = 'Current password is required';
+
+        if (!newPassword || newPassword.trim() === '')
+            errors.newPassword = 'New password is required';
+        else if (!passwordRegex.test(newPassword))
+            errors.newPassword = 'New password must be at least 8 characters and include at least one uppercase letter, one lowercase letter, one digit, and one special character';
+
+        if (Object.keys(errors).length > 0) {
             return next(new ApiError(400, 'Validation Error', errors));
         }
         next();

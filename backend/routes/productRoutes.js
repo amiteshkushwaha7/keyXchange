@@ -21,7 +21,7 @@ router.route('/:id')
             authMiddleware.authorize('admin'), 
             productController.deleteProduct
     )
-    .put(authMiddleware.protect, 
+    .post(authMiddleware.protect, 
         authMiddleware.authorize('admin'), 
         upload.array('images', 5),
         productController.updateProduct

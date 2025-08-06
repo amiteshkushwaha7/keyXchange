@@ -23,7 +23,7 @@ const CustomerDetailsModal = ({ isOpen, customerId, onClose }) => {
       dispatch(getCustomerWithOrders(customerId));
     }
   }, [dispatch, customerId]);
-
+ 
   if (customerOrdersLoading) {
     return (
       <Modal onClose={onClose} title="Loading Customer Data">
@@ -186,6 +186,13 @@ const CustomerDetailsModal = ({ isOpen, customerId, onClose }) => {
                 {customerBoughtProducts.map(product => (
                   <div key={product._id} className="border border-gray-200 rounded-lg overflow-hidden">
                     <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <img
+                          src={product.images && product.images[0] && product.images[0].url ? product.images[0].url : 'https://via.placeholder.com/40'}
+                          alt={product.title}
+                          className="w-10 h-10 object-cover rounded"
+                        />
+                      </span>
                       <h3 className="font-medium text-gray-900">{product.title}</h3>
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                         ₹{product.price}

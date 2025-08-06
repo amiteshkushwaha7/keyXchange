@@ -9,14 +9,39 @@ const productSchema = new mongoose.Schema(
       min: [3, 'Product title must be at least 3 characters'],
       max: [100, 'Product title must be at most 100 characters'],
     },
-    description: {
+    subtitle: {
       type: String,
       trim: true,
+      max: [100, 'Product subtitle must be at most 200 characters'],
     },
     code: {
       type: String,
       required: [true, 'Product code is required'],
       trim: true,
+    },
+    details: {
+      type: 'array',
+      items: {
+        type: 'string',
+        maxLength: 500,
+      },
+      default: [],
+    },
+    howToRedeem: {
+      type: 'array',
+      items: {
+        type: 'string',
+        maxLength: 500,
+      },
+      default: [],
+    },
+    termsAndConditions: {
+      type: 'array',
+      items: {
+        type: 'string',
+        maxLength: 500,
+      },
+      default: [],
     },
     category: {
       type: String,
@@ -25,7 +50,7 @@ const productSchema = new mongoose.Schema(
     },
     company: {
       type: String,
-      required: [true, 'Company name is required'], // e.g., Amazon, Flipkart
+      required: [true, 'Company name is required'],
       trim: true,
     },
     price: {
@@ -33,10 +58,6 @@ const productSchema = new mongoose.Schema(
       required: [true, 'Price is required'],
       min: [0, 'Price must be a positive number'],
     },
-    // images: {  
-    //   type: [String], // Now stores multiple file paths/URLs
-    //   required: [true, 'Goods information is required'],
-    // },
     images: [{
       url: String,
       public_id: String
@@ -61,16 +82,6 @@ const productSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: false,
-    },
-    howToUse: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    termsAndConditions: {
-      type: String,
-      trim: true,
-      default: '',
     },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,

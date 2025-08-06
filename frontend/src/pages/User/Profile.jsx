@@ -1,8 +1,8 @@
 import { useSelector, useDispatch } from "react-redux"; 
-import { Formik, Form, Field, ErrorMessage } from "formik"; 
+// Removed Formik imports
 import { useState } from "react"; 
 import { toast } from "react-toastify"; 
-import { resetPassword } from "../../features/auth/authSlice"; 
+import { updatePassword } from "../../features/auth/authSlice"; 
 import { UserIcon, EnvelopeIcon, PhoneIcon, LockClosedIcon, TrashIcon, PencilSquareIcon } from "@heroicons/react/24/outline"; 
 
 const Profile = () => {
@@ -28,7 +28,10 @@ const Profile = () => {
   const handlePasswordSubmit = async (values, { resetForm }) => {
     setIsLoading(true);
     try {
-      await dispatch(resetPassword({ currentPassword: values.currentPassword, newPassword: values.newPassword, confirmPassword: values.confirmPassword })).unwrap();
+      await dispatch(updatePassword({ 
+        currentPassword: values.currentPassword, 
+        newPassword: values.newPassword }))
+      .unwrap();
       toast.success('Password changed successfully');
       resetForm();
     } catch (err) {
@@ -79,64 +82,111 @@ const Profile = () => {
 
       {/* Tab content */}
       {activeTab === 'profile' && (
-        <Formik initialValues={{ email: user?.email || '', name: user?.name || '' }} onSubmit={handleProfileSubmit}>
-          {({ isSubmitting }) => (
-            <Form className="space-y-4">
-              <div>
-                <label className="block mb-1 font-semibold text-gray-700" htmlFor="name">Name</label>
-                <Field name="name" type="text" className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400" />
-                <ErrorMessage name="name" component="div" className="text-red-500 text-sm" />
-              </div>
-              <div>
-                <label className="block mb-1 font-semibold text-gray-700" htmlFor="email">Email</label>
-                <Field name="email" type="email" className="border rounded px-3 py-2 w-full bg-gray-100 cursor-not-allowed" disabled />
-              </div>
-              <button
-                type="submit"
-                disabled={isSubmitting || isLoading}
-                className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition ${isSubmitting || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {isSubmitting || isLoading ? 'Updating...' : 'Update Profile'}
-              </button>
-            </Form>
-          )}
-        </Formik>
+        <form
+          className="space-y-4"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const name = e.target.name.value;
+            const email = user?.email || '';
+            setIsLoading(true);
+            try {
+              await handleProfileSubmit({ name, email }, { setSubmitting: () => {} });
+            } finally {
+              setIsLoading(false);
+            }
+          }}
+        >
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700" htmlFor="name">Name</label>
+            <input
+              name="name"
+              type="text"
+              defaultValue={user?.name || ''}
+              className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700" htmlFor="email">Email</label>
+            <input
+              name="email"
+              type="email"
+              value={user?.email || ''}
+              className="border rounded px-3 py-2 w-full bg-gray-100 cursor-not-allowed"
+              disabled
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? 'Updating...' : 'Update Profile'}
+          </button>
+        </form>
       )}
 
       {activeTab === 'password' && (
-        <Formik
-          initialValues={{ currentPassword: '', newPassword: '', confirmPassword: '' }}
-          validate={values => {
-            const errors = {};
-            if (!values.currentPassword) errors.currentPassword = 'Required';
-            if (!values.newPassword) errors.newPassword = 'Required';
-            if (values.newPassword !== values.confirmPassword) errors.confirmPassword = 'Passwords must match';
-            return errors;
+        <form
+          className="space-y-4 max-w-md"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const currentPassword = e.target.currentPassword.value;
+            const newPassword = e.target.newPassword.value;
+            const confirmPassword = e.target.confirmPassword.value;
+            if (!currentPassword || !newPassword) {
+              toast.error('All fields are required');
+              return;
+            }
+            if (newPassword !== confirmPassword) {
+              toast.error('Passwords do not match');
+              return;
+            }
+            setIsLoading(true);
+            try {
+              await handlePasswordSubmit({ currentPassword, newPassword }, { resetForm: () => {
+                e.target.reset();
+              }});
+            } finally {
+              setIsLoading(false);
+            }
           }}
-          onSubmit={handlePasswordSubmit}
         >
-          {({ isSubmitting }) => (
-            <Form className="space-y-4 max-w-md">
-              {['currentPassword', 'newPassword', 'confirmPassword'].map(field => (
-                <div key={field}>
-                  <label className="block mb-1 font-semibold text-gray-700" htmlFor={field}>
-                    {field === 'currentPassword' ? 'Current Password' : field === 'newPassword' ? 'New Password' : 'Confirm Password'}
-                  </label>
-                  <Field name={field} type="password" className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400" />
-                  <ErrorMessage name={field} component="div" className="text-red-500 text-sm" />
-                </div>
-              ))}
-              
-              <button
-                type="submit"
-                disabled={isSubmitting || isLoading}
-                className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition ${isSubmitting || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {isSubmitting || isLoading ? 'Changing...' : 'Change Password'}
-              </button>
-            </Form>
-          )}
-        </Formik>
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700" htmlFor="currentPassword">Current Password</label>
+            <input
+              name="currentPassword"
+              type="password"
+              className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700" htmlFor="newPassword">New Password</label>
+            <input
+              name="newPassword"
+              type="password"
+              className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-semibold text-gray-700" htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              name="confirmPassword"
+              type="password"
+              className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? 'Changing...' : 'Change Password'}
+          </button>
+        </form>
       )}
 
       {activeTab === 'delete' && (

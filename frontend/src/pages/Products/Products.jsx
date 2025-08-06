@@ -24,7 +24,7 @@ const Products = () => {
       state: {
         product,
         similarProducts
-      }
+      } 
     });
   };
 

@@ -33,7 +33,7 @@ const authAPI = {
 
   updatePasswordAPI: async (data) => {
     const res = await api.patch('/auth/update-password', data);
-    return res.data;
+    return res.data; 
   },
 
   resetPasswordAPI: async ({ token, password, confirmPassword }) => {
