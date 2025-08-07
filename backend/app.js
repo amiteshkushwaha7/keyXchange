@@ -38,7 +38,7 @@ app.use('/api/v1/users', userRoutes);
 
 app.use('/api/v1/admin/customers', customerRoutes);
 
-app.use('/api/v1/orders', orderRouter);
+app.use('/api/v1/orders', orderRouter); 
 app.use('/api/v1/admin/orders', orderRouter);
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));

@@ -9,7 +9,7 @@ const store = configureStore({
     admin: adminReducer,
     auth: authReducer,
     products: productReducer,
-    orders: orderReducer,
+    orders: orderReducer, 
   },
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({

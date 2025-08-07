@@ -39,6 +39,7 @@ import Users from './pages/Admin/Users';
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
   const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
   // Load user on app mount

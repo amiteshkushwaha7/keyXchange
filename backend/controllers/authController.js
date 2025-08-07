@@ -59,11 +59,11 @@ const authController = {
             }
         }).send(
             res
-                .cookie("accessToken", accessToken, { 
-                    httpOnly: true, 
-                    secure: true, 
-                    sameSite: 'None', 
-                    path: "/", 
+                .cookie("accessToken", accessToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'None',
+                    path: "/",
                     maxAge: ms(process.env.ACCESS_TOKEN_EXPIRY)
                 })
                 .cookie("refreshToken", refreshToken, {
@@ -104,11 +104,11 @@ const authController = {
             }
         }).send(
             res
-                .cookie("accessToken", accessToken, { 
-                    httpOnly: true, 
-                    secure: true, 
-                    sameSite: 'None', 
-                    path: "/", 
+                .cookie("accessToken", accessToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'None',
+                    path: "/",
                     maxAge: ms(process.env.ACCESS_TOKEN_EXPIRY)
                 })
                 .cookie("refreshToken", refreshToken, {
@@ -134,11 +134,11 @@ const authController = {
             message: "User logged Out"
         }).send(
             res
-                .clearCookie("accessToken", { 
-                    httpOnly: true, 
-                    secure: true, 
-                    sameSite: 'None', 
-                    path: "/" 
+                .clearCookie("accessToken", {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'None',
+                    path: "/"
                 })
                 .clearCookie("refreshToken", {
                     httpOnly: true,
@@ -153,7 +153,7 @@ const authController = {
         const user = await User.findById(req.user._id).select("-password -refreshToken");
         return new ApiResponse({
             statusCode: 200,
-            message: "User retrieved successfully", 
+            message: "User retrieved successfully",
             data: {
                 // accessToken: req.headers.authorization?.split(' ')[1] || null,
                 accessToken: req.cookies.accessToken || req.headers.authorization?.split(' ')[1],
@@ -162,7 +162,6 @@ const authController = {
         }).send(res);
     }),
 
-    // Add this refresh token endpoint (uncomment and modify your existing one)
     refreshToken: catchAsync(async (req, res) => {
         const refreshToken = req.cookies.refreshToken;
 
@@ -239,17 +238,18 @@ const authController = {
             }
         }).send(
             res
-                .cookie("accessToken", newAccessToken, { 
-                        httpOnly: true, 
-                        secure: true, 
-                        sameSite: 'None', 
-                        path: "/", 
-                        maxAge: ms(process.env.ACCESS_TOKEN_EXPIRY)
+                .cookie("accessToken", newAccessToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'None',
+                    path: "/",
+                    maxAge: ms(process.env.ACCESS_TOKEN_EXPIRY)
                 })
         );
     }),
 
     updatePassword: catchAsync(async (req, res) => {
+        // console.log(req.body);
         const user = await User.findById(req.user._id).select('+password');
 
         if (!(await user.matchPassword(req.body.currentPassword))) {
@@ -257,7 +257,6 @@ const authController = {
         }
 
         user.password = req.body.newPassword;
-
         await user.save({ validateBeforeSave: false });
 
         return new ApiResponse({
@@ -268,6 +267,35 @@ const authController = {
             }
         }).send(res);
     }),
+
+    updateProfile: catchAsync(async (req, res) => {
+        const user = await User.findById(req.user._id);
+
+        if(!user) {
+            throw new ApiError(404, 'User not found');
+        }
+
+        user.name = req.body.name || user.name;
+        await user.save({ validateBeforeSave: false });
+
+        return new ApiResponse({
+            statusCode: 200,
+            message: "Profile updated successfully",
+            data: {
+                user: await User.findById(user._id).select("-password -refreshToken")
+            }
+        }).send(res);
+    }),
+
+    deleteAccount: catchAsync(async (req, res) => {
+        const user = await User.findById(req.user._id);
+        await user.remove();
+
+        return new ApiResponse({
+            statusCode: 200,
+            message: "Account deleted successfully"
+        }).send(res);
+    })
 };
 
 export default authController;

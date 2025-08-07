@@ -10,8 +10,8 @@ const AccountLayout = () => {
   const tabs = [ 
     { name: 'Profile', path: '/account/profile', icon: UserIcon }, 
     { name: 'Orders', path: '/account/my-orders', icon: ClipboardDocumentListIcon } 
-  ]; 
-
+  ];  
+ 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}

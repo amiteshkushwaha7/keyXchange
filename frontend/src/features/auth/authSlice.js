@@ -22,6 +22,9 @@ export const refreshUser = createAuthThunk('refreshUser', authAPI.refreshAPI);
 export const forgotPassword = createAuthThunk('forgotPassword', authAPI.forgotPasswordAPI);
 export const updatePassword = createAuthThunk('updatePassword', authAPI.updatePasswordAPI);
 export const resetPassword = createAuthThunk('resetPassword', authAPI.resetPasswordAPI);
+export const updateProfile = createAuthThunk('updateProfile', authAPI.updateProfileAPI);
+export const deleteAccount = createAuthThunk('deleteAccount', authAPI.deleteAccountAPI);
+export const getProfile = createAuthThunk('getProfile', authAPI.getProfileAPI);
 
 const initialState = {
   user: null,
@@ -138,6 +141,31 @@ const authSlice = createSlice({
     addCommonCases(resetPassword);
     builder.addCase(resetPassword.fulfilled, (state, action) => {
       state.loading = false;
+      state.message = action.payload.message; 
+    });
+
+    // Update Profile
+    addCommonCases(updateProfile);
+    builder.addCase(updateProfile.fulfilled, (state, action) => {
+      state.loading = false;
+      state.user = action.payload.user;
+      state.message = action.payload.message;
+    });
+
+    // Delete Account
+    addCommonCases(deleteAccount);
+    builder.addCase(deleteAccount.fulfilled, (state) => {
+      state.loading = false;
+      state.user = null;
+      state.isAuthenticated = false;
+      state.message = 'Account deleted successfully';
+    });
+
+    // Get Profile
+    addCommonCases(getProfile);
+    builder.addCase(getProfile.fulfilled, (state, action) => {
+      state.loading = false;
+      state.user = action.payload.user;
       state.message = action.payload.message;
     });
   }

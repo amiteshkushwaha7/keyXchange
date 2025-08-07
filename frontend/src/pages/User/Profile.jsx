@@ -1,57 +1,89 @@
-import { useSelector, useDispatch } from "react-redux"; 
-// Removed Formik imports
-import { useState } from "react"; 
-import { toast } from "react-toastify"; 
-import { updatePassword } from "../../features/auth/authSlice"; 
-import { UserIcon, EnvelopeIcon, PhoneIcon, LockClosedIcon, TrashIcon, PencilSquareIcon } from "@heroicons/react/24/outline"; 
+import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { 
+  updatePassword, 
+  logoutUser, 
+  updateProfile, 
+  deleteAccount 
+} from "../../features/auth/authSlice";
+import { LockClosedIcon, TrashIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 
 const Profile = () => {
-  const { user } = useSelector((state) => state.auth); 
-  const dispatch = useDispatch(); 
-  const [activeTab, setActiveTab] = useState("profile"); 
-  const [showDeleteModal, setShowDeleteModal] = useState(false); 
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [activeTab, setActiveTab] = useState("profile");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleProfileSubmit = async (values, { setSubmitting }) => {
-    setIsLoading(true); 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); 
-      toast.success('Profile updated successfully'); 
-    } catch (err) { 
-      toast.error(err?.data?.message || 'Update failed'); 
-    } finally { 
-      setIsLoading(false); 
-      setSubmitting(false); 
-    } 
-  };
-
-  const handlePasswordSubmit = async (values, { resetForm }) => {
+  // Handle account deletion
+  const handleDeleteAccount = async () => {
     setIsLoading(true);
     try {
-      await dispatch(updatePassword({ 
-        currentPassword: values.currentPassword, 
-        newPassword: values.newPassword }))
-      .unwrap();
-      toast.success('Password changed successfully');
-      resetForm();
+      await dispatch(deleteAccount()).unwrap();
+      toast.success('Account deleted successfully');
+      navigate('/');
     } catch (err) {
-      toast.error(err?.data?.message || 'Password change failed');
+      toast.error(err?.data?.message || err.message || 'Account deletion failed');
+    } finally {
+      setIsLoading(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  // Handle profile update
+  const onSubmitProfile = async (e) => {
+    e.preventDefault();
+    const name = e.target.name.value;
+    if (!name.trim()) {
+      toast.error('Name cannot be empty');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await dispatch(updateProfile({ name })).unwrap();
+      toast.success('Profile updated successfully');
+    } catch (err) {
+      toast.error(err?.data?.message || err.message || 'Update failed');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDeleteAccount = async () => {
+  // Handle password change
+  const onSubmitPassword = async (e) => {
+    e.preventDefault();
+    const currentPassword = e.target.currentPassword.value;
+    const newPassword = e.target.newPassword.value;
+
+    if (!currentPassword || !newPassword) {
+      toast.error('All fields are required');
+      return;
+    }
+
+    if (newPassword === currentPassword) {
+      toast.error('New password cannot be the same as current password');
+      return;
+    }
+
     setIsLoading(true);
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success('Account deleted successfully');
-      // Redirect after delete logic here
+      await dispatch(updatePassword({ currentPassword, newPassword })).unwrap();
+      toast.success('Password changed successfully');
+      e.target.reset();
+
+      await dispatch(logoutUser());
+      navigate('/login');
     } catch (err) {
-      toast.error(err?.data?.message || 'Account deletion failed');
+      toast.error(err?.data?.message || err.message || 'Password change failed');
     } finally {
       setIsLoading(false);
-      setShowDeleteModal(false);
     }
   };
 
@@ -65,11 +97,10 @@ const Profile = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex items-center gap-2 px-4 py-2 -mb-px border-b-2 transition ${
-              activeTab === tab
+            className={`flex items-center gap-2 px-4 py-2 -mb-px border-b-2 transition ${activeTab === tab
                 ? 'border-blue-600 text-blue-600 font-semibold'
                 : 'border-transparent text-gray-500 hover:text-blue-600'
-            }`}
+              }`}
             type="button"
           >
             {tab === 'profile' && <PencilSquareIcon className="w-5 h-5" />}
@@ -80,22 +111,9 @@ const Profile = () => {
         ))}
       </nav>
 
-      {/* Tab content */}
+      {/* Tab Content */}
       {activeTab === 'profile' && (
-        <form
-          className="space-y-4"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const name = e.target.name.value;
-            const email = user?.email || '';
-            setIsLoading(true);
-            try {
-              await handleProfileSubmit({ name, email }, { setSubmitting: () => {} });
-            } finally {
-              setIsLoading(false);
-            }
-          }}
-        >
+        <form className="space-y-4" onSubmit={onSubmitProfile}>
           <div>
             <label className="block mb-1 font-semibold text-gray-700" htmlFor="name">Name</label>
             <input
@@ -104,16 +122,6 @@ const Profile = () => {
               defaultValue={user?.name || ''}
               className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
               required
-            />
-          </div>
-          <div>
-            <label className="block mb-1 font-semibold text-gray-700" htmlFor="email">Email</label>
-            <input
-              name="email"
-              type="email"
-              value={user?.email || ''}
-              className="border rounded px-3 py-2 w-full bg-gray-100 cursor-not-allowed"
-              disabled
             />
           </div>
           <button
@@ -127,31 +135,7 @@ const Profile = () => {
       )}
 
       {activeTab === 'password' && (
-        <form
-          className="space-y-4 max-w-md"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const currentPassword = e.target.currentPassword.value;
-            const newPassword = e.target.newPassword.value;
-            const confirmPassword = e.target.confirmPassword.value;
-            if (!currentPassword || !newPassword) {
-              toast.error('All fields are required');
-              return;
-            }
-            if (newPassword !== confirmPassword) {
-              toast.error('Passwords do not match');
-              return;
-            }
-            setIsLoading(true);
-            try {
-              await handlePasswordSubmit({ currentPassword, newPassword }, { resetForm: () => {
-                e.target.reset();
-              }});
-            } finally {
-              setIsLoading(false);
-            }
-          }}
-        >
+        <form className="space-y-4 max-w-md" onSubmit={onSubmitPassword}>
           <div>
             <label className="block mb-1 font-semibold text-gray-700" htmlFor="currentPassword">Current Password</label>
             <input
@@ -165,15 +149,6 @@ const Profile = () => {
             <label className="block mb-1 font-semibold text-gray-700" htmlFor="newPassword">New Password</label>
             <input
               name="newPassword"
-              type="password"
-              className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-1 font-semibold text-gray-700" htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              name="confirmPassword"
               type="password"
               className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
               required

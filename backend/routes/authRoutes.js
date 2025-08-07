@@ -12,7 +12,7 @@ router.route('/login')
     .post(validate.loginInput, authController.login);
 
 router.route('/logout')
-    .post(authController.protect, authController.logout);
+    .post(authMiddleware.protect, authController.logout);
 
 router.route('/update-password')
     .patch(authMiddleware.protect, validate.updatePasswordInput, authController.updatePassword);
@@ -20,10 +20,16 @@ router.route('/update-password')
 // router.post('/forgot-password', authController.forgotPassword);
 // router.patch('/reset-password/:token', authController.resetPassword);
 
+router.route('/refresh')
+    .get(authController.refreshToken);
+
 router.route('/me')
     .get(authMiddleware.protect, authController.getMe);
 
-router.route('/refresh')
-    .get(authController.refreshToken);
+router.route('/update-profile')
+    .put(authMiddleware.protect, authController.updateProfile);
+
+// router.route('/delete-account')
+//     .delete(authMiddleware.protect, authController.deleteAccount);
 
 export default router;
