@@ -1,8 +1,8 @@
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../../features/auth/authSlice';
- 
-const LogoutButton = () => {
+
+const LogoutButton = ({ children, className }) => {  // Add `children` and `className` as props
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -12,10 +12,10 @@ const LogoutButton = () => {
   };
 
   return (
-    <button onClick={handleLogout} className="text-red-500 hover:underline">
-      Logout
+    <button onClick={handleLogout} className={className}>
+      {children || 'Logout'}  {/* Render children if provided, else fallback to "Logout" */}
     </button>
   );
-}; 
+};
 
 export default LogoutButton;

@@ -23,7 +23,7 @@ export const createProduct = createAdminThunk('createProduct', adminAPI.createPr
 export const updateProduct = createAdminThunk('updateProduct', adminAPI.updateProductAPI);
 export const deleteProduct = createAdminThunk('deleteProduct', adminAPI.deleteProductAPI);
 export const searchProducts = createAdminThunk('searchProducts', adminAPI.searchProducts);
-
+ 
 // Orders
 export const getAllOrders = createAdminThunk('getAllOrders', adminAPI.getAllOrdersAPI);
 export const getOrderById = createAdminThunk('getOrderById', adminAPI.getOrderByIdAPI);
@@ -60,7 +60,6 @@ const initialState = {
   customersLoading: false,
   customerOrders: [],
   customerOrdersLoading: false,
-  customerBoughtProducts: [],
   customerOrdersError: null,
 
   // Users
@@ -191,7 +190,6 @@ const adminSlice = createSlice({
       state.customerOrdersLoading = false;
       state.customer = action.payload?.data?.customer || null;
       state.customerOrders = action.payload?.data?.orders || [];
-      state.customerBoughtProducts = action.payload?.data?.boughtProducts || [];
       state.message = action.payload.message;
     });
 

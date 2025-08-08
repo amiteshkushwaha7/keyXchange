@@ -62,7 +62,7 @@ const adminAPI = {
   updateOrderStatusAPI: async ({ id, status }) => {
     const res = await api.patch(`/admin/orders/${id}/status`, { status });
     return res.data;
-  },
+  }, 
 
   // Customers
   getAllCustomersAPI: async (params = {}) => {
@@ -75,7 +75,7 @@ const adminAPI = {
     return res.data;
   },
 
-  // Users
+  // Users 
   getAllUsersAPI: async (params = {}) => {
     const res = await api.get('/admin/users', { params });
     return res.data;

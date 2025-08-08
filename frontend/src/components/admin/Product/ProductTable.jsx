@@ -289,7 +289,7 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
                 </button>
               </div>
             </div>
-          </div>
+          </div> 
         </div>
       )}
     </div>

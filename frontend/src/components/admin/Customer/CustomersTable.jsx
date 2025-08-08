@@ -5,7 +5,7 @@ const CustomersTable = ({ customers, onViewDetails }) => {
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th>Name</th>
+            <th>Name</th> 
             <th>Email</th>
             <th>Role</th>
             <th>Status</th>

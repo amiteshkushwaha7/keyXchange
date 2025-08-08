@@ -34,7 +34,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div>
+    <div className="w-full min-h-screen px-8 py-4 space-y-6 bg-white rounded-2xl shadow-lg border border-gray-100">
       <h1 className="text-2xl font-bold mb-6">Dashboard Overview</h1>
 
       {/* Stats Cards */}
@@ -69,3 +69,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+ 

@@ -6,10 +6,13 @@ import {
     ClockIcon,
     CreditCardIcon,
     CubeIcon,
-    CurrencyRupeeIcon, 
+    CurrencyRupeeIcon,
     XMarkIcon,
     CheckCircleIcon,
     XCircleIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ShoppingBagIcon,
 } from '@heroicons/react/24/outline';
 
 const Order = () => {
@@ -17,30 +20,24 @@ const Order = () => {
     const { orders = [], loading = false } = useSelector((state) => state.orders || {});
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedOrder, setSelectedOrder] = useState(null);
-
-    // Reference to the first order item to measure its height
     const orderItemRef = useRef(null);
-
-    // State to hold dynamic count of how many orders fit per page
     const [ordersPerPage, setOrdersPerPage] = useState(5);
 
     useEffect(() => {
         dispatch(getMyOrders());
     }, [dispatch]);
 
-    // Calculate how many orders per page fit in the viewport height
     useLayoutEffect(() => {
         if (orders.length === 0) return;
 
         const calculateOrdersPerPage = () => {
             const viewportHeight = window.innerHeight;
-            const containerPadding = 32 * 2; // approx padding top + bottom (p-4 = 16px*2)
-            const paginationHeight = 72; // estimate height for pagination controls and margins
-            const extraSpacing = 48; // additional spacing for margins/headers if needed
+            const containerPadding = 32 * 2;
+            const paginationHeight = 72;
+            const extraSpacing = 48;
 
             if (orderItemRef.current) {
                 const orderItemHeight = orderItemRef.current.getBoundingClientRect().height;
-                // Calculate number of orders that can fit without scrolling
                 const fitCount = Math.floor(
                     (viewportHeight - containerPadding - paginationHeight - extraSpacing) / orderItemHeight
                 );
@@ -49,22 +46,18 @@ const Order = () => {
         };
 
         calculateOrdersPerPage();
-
         window.addEventListener('resize', calculateOrdersPerPage);
         return () => window.removeEventListener('resize', calculateOrdersPerPage);
     }, [orders]);
 
-    // Adjust total pages based on dynamic ordersPerPage
     const totalPages = Math.ceil(orders.length / ordersPerPage);
 
-    // Ensure currentPage is within bounds when ordersPerPage or orders change
     useEffect(() => {
         if (currentPage > totalPages) {
             setCurrentPage(totalPages || 1);
         }
     }, [totalPages, currentPage]);
 
-    // Slice orders based on pagination
     const paginatedOrders = orders.slice(
         (currentPage - 1) * ordersPerPage,
         currentPage * ordersPerPage
@@ -76,117 +69,135 @@ const Order = () => {
 
     const renderStatus = (delivered) =>
         delivered ? (
-            <span className="flex items-center space-x-1 text-green-600 font-semibold">
-                <CheckCircleIcon className="h-5 w-5" />
-                <span>Delivered</span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
+                <CheckCircleIcon className="h-4 w-4 mr-1" />
+                Delivered
             </span>
         ) : (
-            <span className="flex items-center space-x-1 text-red-600 font-semibold">
-                <XCircleIcon className="h-5 w-5" />
-                <span>Pending</span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
+                <XCircleIcon className="h-4 w-4 mr-1" />
+                Pending
             </span>
         );
 
     const formatDateLong = (dateString) =>
         new Date(dateString).toLocaleDateString('en-US', {
             day: 'numeric',
-            month: 'long',
+            month: 'short',
             year: 'numeric',
         });
 
     const formatDateTime = (dateString) =>
         new Date(dateString).toLocaleString('en-US', {
             day: 'numeric',
-            month: 'long',
+            month: 'short',
             year: 'numeric',
             hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
+            minute: '2-digit',
             hour12: true,
         });
 
     if (loading) {
         return (
             <div className="flex justify-center items-center py-8">
-                <span className="text-gray-500 text-lg">Loading your orders...</span>
+                <div className="animate-pulse flex flex-col items-center">
+                    <ShoppingBagIcon className="h-12 w-12 text-gray-300 mb-4" />
+                    <span className="text-gray-400 text-lg">Loading your orders...</span>
+                </div>
             </div>
         );
     }
 
     if (orders.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 text-center text-gray-400">
-                <CubeIcon className="h-14 w-14 mb-4" />
-                <p className="text-lg font-semibold">You haven't placed any orders yet.</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="bg-violet-100 p-6 rounded-full mb-6">
+                    <ShoppingBagIcon className="h-12 w-12 text-violet-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">No orders yet</h3>
+                <p className="text-gray-500 mb-6 max-w-md">
+                    You haven't placed any orders yet. Start shopping to see your orders here.
+                </p>
                 <Link
                     to="/"
-                    className="mt-3 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    className="px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-md hover:shadow-lg"
                 >
                     Browse Products
                 </Link>
             </div>
         );
     }
+ 
+    return (  
+        <div>
+            <div className="w-full min-h-screen mx-auto px-8 py-4 space-y-6 bg-white rounded-2xl shadow-lg border border-gray-100">
+                <h2 className="text-lg font-bold text-gray-800 px-5 pb-3 border-b border-b-gray-200">MY ORDERS</h2>
 
-    return (
-        <>
-            <div className="max-w-4xl mx-auto p-4 space-y-4">
-                {paginatedOrders.map((order, idx) => (
-                    <div
-                        key={order._id}
-                        ref={idx === 0 ? orderItemRef : null} // Measure only the first order's height
-                        onClick={() => setSelectedOrder(order)}
-                        className="cursor-pointer bg-white shadow-md rounded-md p-6 border border-gray-100 hover:shadow-lg transition transform hover:scale-[1.02]"
-                        aria-label={`Open details for order ${order._id}`}
-                    >
-                        <h3 className="text-lg font-semibold mb-2 text-blue-700">Order #{order._id}</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-700">
-                            <div>
-                                <div className="text-sm font-medium text-gray-500">Order Status</div>
-                                {renderStatus(order.isDelivered)}
-                            </div>
-                            <div>
-                                <div className="text-sm font-medium text-gray-500">Payment Status</div>
-                                <span className="capitalize">{order.paymentStatus}</span>
-                            </div>
-                            <div>
-                                <div className="text-sm font-medium text-gray-500">Amount Paid</div>
-                                <div className="flex items-center space-x-1">
-                                    <CurrencyRupeeIcon className="h-5 w-5 text-gray-500" />
-                                    <span>₹{order.amountPaid}</span>
+                <div className="grid gap-5">
+                    {paginatedOrders.map((order, idx) => ( 
+                        <Link
+                            to={`/account/my-orders/${order._id}`}  // Changed to Link
+                            key={order._id}
+                            ref={idx === 0 ? orderItemRef : null}
+                            className="group block cursor-pointer bg-white border-b border-b-gray-200 hover:shadow-md transition-all hover:border-violet-200 hover:translate-y-[-2px] hover:rounded-lg"
+                            aria-label={`View details for order ${order._id}`}
+                        >
+                            <div className="p-5">
+                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-violet-600 transition-colors">
+                                            Order #{order._id.slice(-8).toUpperCase()}
+                                        </h3>
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            Placed on {formatDateLong(order.createdAt)}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-gray-500">Status</span>
+                                            {renderStatus(order.isDelivered)}
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-gray-500">Amount</span>
+                                            <div className="flex items-center font-medium text-gray-800">
+                                                <CurrencyRupeeIcon className="h-4 w-4 mr-1" />
+                                                {order.amountPaid}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <div className="text-sm font-medium text-gray-500">Placed On</div>
-                                <div>{formatDateLong(order.createdAt)}</div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                        </Link>
+                    ))}
+                </div>
 
                 {/* Pagination */}
-                <div className="flex justify-center items-center space-x-4 mt-6">
-                    <button
-                        onClick={handlePrev}
-                        disabled={currentPage === 1}
-                        className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Previous
-                    </button>
-                    <span className="text-gray-700 font-semibold">
-                        Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                        onClick={handleNext}
-                        disabled={currentPage === totalPages}
-                        className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Next
-                    </button>
-                </div>
+                {totalPages > 1 && (
+                    <div className="flex justify-between items-center mt-8">
+                        <button
+                            onClick={handlePrev}
+                            disabled={currentPage === 1}
+                            className="flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <ChevronLeftIcon className="h-5 w-5 mr-1" />
+                            Previous
+                        </button>
+                        <span className="text-sm text-gray-600">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            onClick={handleNext}
+                            disabled={currentPage === totalPages}
+                            className="flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Next
+                            <ChevronRightIcon className="h-5 w-5 ml-1" />
+                        </button>
+                    </div>
+                )}
             </div>
 
-            {/* Modal for order details */}
+            {/* Order Details Modal */}
             {selectedOrder && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
@@ -196,129 +207,127 @@ const Order = () => {
                     aria-labelledby="modal-title"
                 >
                     <div
-                        className="
-        bg-gradient-to-br from-white to-gray-50
-        rounded-xl shadow-2xl max-w-3xl w-full p-8 relative
-        overflow-y-auto max-h-[90vh]  /* scroll inside if content is tall */
-        transform transition-transform duration-300 scale-100
-        animate-fadeInModal
-      "
-                        onClick={(e) => e.stopPropagation()} // Prevent modal close on inner click
+                        className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
                         tabIndex={-1}
                     >
-                        <button
-                            onClick={closeModal}
-                            aria-label="Close modal"
-                            className="
-          absolute top-4 right-4
-          text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded
-          transition-colors duration-200
-        "
-                        >
-                            <XMarkIcon className="h-7 w-7" />
-                        </button>
-                        <h2
-                            id="modal-title"
-                            className="text-3xl font-extrabold mb-6 text-blue-700 tracking-wide"
-                        >
-                            Order Details - #{selectedOrder._id}
-                        </h2>
-                        <div className="space-y-5 text-gray-800 leading-relaxed">
+                        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center z-10">
+                            <h2
+                                id="modal-title"
+                                className="text-xl font-bold text-gray-800"
+                            >
+                                Order Details
+                            </h2>
+                            <button
+                                onClick={closeModal}
+                                aria-label="Close modal"
+                                className="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-100 transition"
+                            >
+                                <XMarkIcon className="h-6 w-6" />
+                            </button>
+                        </div>
 
-                            {/* Created & Updated Times */}
-                            <section className="flex flex-col sm:flex-row sm:space-x-12 border-b border-gray-300 pb-4">
-                                <div className="flex items-center space-x-3 mb-2 sm:mb-0">
-                                    <ClockIcon className="h-6 w-6 text-blue-400" />
-                                    <span>
-                                        <strong className="font-semibold">Created At:</strong> {formatDateTime(selectedOrder.createdAt)}
-                                    </span>
+                        <div className="p-6 space-y-6">
+                            {/* Order Summary */}
+                            <div className="bg-gray-50 rounded-lg p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <h3 className="text-sm font-medium text-gray-500 mb-1">Order ID</h3>
+                                        <p className="font-mono text-sm text-gray-800">{selectedOrder._id}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
+                                        {renderStatus(selectedOrder.isDelivered)}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-medium text-gray-500 mb-1">Placed On</h3>
+                                        <p>{formatDateTime(selectedOrder.createdAt)}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-medium text-gray-500 mb-1">Last Updated</h3>
+                                        <p>{formatDateTime(selectedOrder.updatedAt)}</p>
+                                    </div>
                                 </div>
-                                <div className="flex items-center space-x-3">
-                                    <ClockIcon className="h-6 w-6 text-blue-400" />
-                                    <span>
-                                        <strong className="font-semibold">Updated At:</strong> {formatDateTime(selectedOrder.updatedAt)}
-                                    </span>
-                                </div>
-                            </section>
+                            </div>
 
-                            {/* Product info */}
-                            <section className="border-b border-gray-300 pb-4">
-                                <div className="flex items-center space-x-3 mb-2">
-                                    <CubeIcon className="h-6 w-6 text-green-400" />
-                                    <span>
-                                        <strong className="font-semibold">Product ID:</strong> {selectedOrder.product}
-                                    </span>
+                            {/* Product Information */}
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Product</h3>
+                                <div className="flex items-start space-x-4">
+                                    <div className="bg-violet-100 p-3 rounded-lg">
+                                        <CubeIcon className="h-6 w-6 text-violet-600" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-gray-800">Product ID</h4>
+                                        <p className="text-sm text-gray-600">{selectedOrder.product}</p>
+                                    </div>
                                 </div>
-                            </section>
+                            </div>
 
-                            {/* Payment and Amount */}
-                            <section className="border-b border-gray-300 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
-                                <div className="flex items-center space-x-3">
-                                    <CurrencyRupeeIcon className="h-6 w-6 text-green-500" />
-                                    <span>
-                                        <strong className="font-semibold">Amount Paid:</strong> ₹{selectedOrder.amountPaid}
-                                    </span>
+                            {/* Payment Information */}
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Payment</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="bg-green-100 p-2 rounded-full">
+                                            <CurrencyRupeeIcon className="h-5 w-5 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-gray-500">Amount Paid</h4>
+                                            <p className="font-medium text-gray-800">₹{selectedOrder.amountPaid}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        <div className="bg-blue-100 p-2 rounded-full">
+                                            <CreditCardIcon className="h-5 w-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-gray-500">Payment Method</h4>
+                                            <p className="font-medium text-gray-800 capitalize">{selectedOrder.paymentMethod}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        <div className="bg-amber-100 p-2 rounded-full">
+                                            <ShoppingBagIcon className="h-5 w-5 text-amber-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-gray-500">Quantity</h4>
+                                            <p className="font-medium text-gray-800">{selectedOrder.quantity}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        <div className="bg-purple-100 p-2 rounded-full">
+                                            <CheckCircleIcon className="h-5 w-5 text-purple-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-gray-500">Payment Status</h4>
+                                            <p className="font-medium text-gray-800 capitalize">{selectedOrder.paymentStatus}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex items-center space-x-3">
-                                    <CreditCardIcon className="h-6 w-6 text-yellow-500" />
-                                    <span>
-                                        <strong className="font-semibold">Payment Method:</strong> {selectedOrder.paymentMethod}
-                                    </span>
-                                </div>
-                                <div>
-                                    <strong className="font-semibold">Payment Status:</strong> {selectedOrder.paymentStatus}
-                                </div>
-                                <div>
-                                    <strong className="font-semibold">Quantity:</strong> {selectedOrder.quantity}
-                                </div>
-                            </section>
+                            </div>
 
-                            {/* Razorpay Order ID */}
-                            <section className="border-b border-gray-300 pb-4">
-                                <div>
-                                    <strong className="font-semibold">Razorpay Order ID:</strong>{' '}
-                                    <code className="text-sm text-gray-600 break-all bg-gray-100 p-1 rounded">
-                                        {selectedOrder.razorpayOrderId}
-                                    </code>
+                            {/* Additional Information */}
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Additional Details</h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <h4 className="text-sm font-medium text-gray-500">Razorpay Order ID</h4>
+                                        <p className="font-mono text-sm text-gray-800 bg-gray-100 p-2 rounded break-all">
+                                            {selectedOrder.razorpayOrderId}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-medium text-gray-500">Buyer ID</h4>
+                                        <p className="text-sm text-gray-800">{selectedOrder.buyer}</p>
+                                    </div>
                                 </div>
-                            </section>
-
-                            {/* Delivery & Buyer info */}
-                            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <strong className="font-semibold">Delivered:</strong>{' '}
-                                    <span className={selectedOrder.isDelivered ? "text-green-600" : "text-red-600"}>
-                                        {selectedOrder.isDelivered ? 'Yes' : 'No'}
-                                    </span>
-                                </div>
-                                <div>
-                                    <strong className="font-semibold">Buyer ID:</strong> {selectedOrder.buyer}
-                                </div>
-                                <div>
-                                    <strong className="font-semibold">Version (__v):</strong> {selectedOrder.__v}
-                                </div>
-                            </section>
+                            </div>
                         </div>
                     </div>
-
-                    <style jsx>{`
-      @keyframes fadeInModal {
-        0% {
-          opacity: 0;
-          transform: translateY(-10px) scale(0.95);
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-      }
-      .animate-fadeInModal {
-        animation: fadeInModal 0.3s ease forwards;
-      }
-    `}</style>
                 </div>
             )}
-        </>
+        </div>
     );
 };
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { refreshUser, clearAuthState } from './features/auth/authSlice';
+// import { refreshUser, clearAuthState } from './features/auth/authSlice';
 import { loadUser } from './features/auth/authSlice';
 
 import Navbar from './components/layouts/Navbar';
@@ -26,14 +26,17 @@ import PrivateRoute from './routes/PrivateRoute';
 import AccountLayout from './components/user/AccountLayout';
 import Profile from './pages/User/Profile';
 import Order from './pages/User/Order';
+import OrderDetails from './components/user/OrderDetails';
 
-// Admin components
+// Admin components 
 import AdminRoute from './routes/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './pages/Admin/Dashboard';
 import Products from './pages/Admin/Products';
 import Orders from './pages/Admin/Orders';
+import AdminOrderDetails from './components/admin/Order/AdminOrderDetails';
 import Customers from './pages/Admin/Customers';
+import CustomerDetails from './components/admin/Customer/CustomerDetails';
 import Users from './pages/Admin/Users';
 
 function App() {
@@ -131,6 +134,7 @@ function App() {
             <Route index element={<Navigate to="my-orders" replace />} />
             <Route path="profile" element={<Profile />} />
             <Route path="my-orders" element={<Order />} />
+            <Route path="my-orders/:orderId" element={<OrderDetails />} />
           </Route>
         </Route>
 
@@ -144,9 +148,9 @@ function App() {
             <Route path="products/:id" element={<Products />} />
             <Route path="products/search" element={<Products />} />
             <Route path="orders" element={<Orders />} />
-            <Route path="orders/:id" element={<Orders />} />
+            <Route path="orders/:orderId" element={<AdminOrderDetails />} />
             <Route path="customers" element={<Customers />} />
-            <Route path="customers/:id" element={<Customers />} />
+            <Route path="customers/:customerId" element={<CustomerDetails />} />
             <Route path="users" element={<Users />} />
             <Route path="users/:id" element={<Users />} />
           </Route>

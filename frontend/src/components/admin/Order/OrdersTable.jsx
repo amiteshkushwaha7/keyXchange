@@ -87,7 +87,7 @@ const OrdersTable = ({ orders = [], onViewDetails, onStatusUpdate }) => {
                     </select>
                   )}
                 </td>
-              </tr>
+              </tr> 
             ))}
           </tbody>
         </table>

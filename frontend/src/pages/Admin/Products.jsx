@@ -42,7 +42,7 @@ const Products = () => {
 
   // Use products from Redux store
   return (
-    <div>
+    <div className="w-full min-h-screen px-8 py-4 space-y-6 bg-white rounded-2xl shadow-lg border border-gray-100">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Products Management</h1>
         <Button onClick={() => {
@@ -50,7 +50,7 @@ const Products = () => {
           setIsModalOpen(true);
         }}>
           Add New Product
-        </Button>
+        </Button> 
       </div>
 
       {productsLoading ? (

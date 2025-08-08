@@ -8,7 +8,14 @@ import {
   updateProfile, 
   deleteAccount 
 } from "../../features/auth/authSlice";
-import { LockClosedIcon, TrashIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { 
+  LockClosedIcon, 
+  TrashIcon, 
+  PencilSquareIcon,
+  UserCircleIcon,
+  ShieldCheckIcon,
+  ExclamationTriangleIcon
+} from "@heroicons/react/24/outline";
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
@@ -86,127 +93,160 @@ const Profile = () => {
       setIsLoading(false);
     }
   };
-
+ 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">My Account</h2>
+    <div className="w-full min-h-screen mx-auto px-8 py-4 bg-white rounded-2xl shadow-lg border border-gray-100">
+      {/* Profile Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="bg-violet-100 p-3 rounded-full">
+          <UserCircleIcon className="h-10 w-10 text-violet-600" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-800">MY ACCOUNT</h2>
+          <p className="text-gray-500">Manage your profile and account settings</p>
+        </div>
+      </div>
 
       {/* Tabs */}
-      <nav className="flex border-b border-gray-300 mb-6">
-        {['profile', 'password', 'delete'].map(tab => (
+      <nav className="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-8">
+        {[
+          { id: 'profile', icon: PencilSquareIcon, label: 'Profile' },
+          { id: 'password', icon: LockClosedIcon, label: 'Password' },
+          { id: 'delete', icon: TrashIcon, label: 'Delete Account' }
+        ].map(tab => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex items-center gap-2 px-4 py-2 -mb-px border-b-2 transition ${activeTab === tab
-                ? 'border-blue-600 text-blue-600 font-semibold'
-                : 'border-transparent text-gray-500 hover:text-blue-600'
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === tab.id
+                ? 'bg-white shadow-sm text-violet-600 font-medium'
+                : 'text-gray-600 hover:text-violet-600'
               }`}
             type="button"
           >
-            {tab === 'profile' && <PencilSquareIcon className="w-5 h-5" />}
-            {tab === 'password' && <LockClosedIcon className="w-5 h-5" />}
-            {tab === 'delete' && <TrashIcon className="w-5 h-5" />}
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            <tab.icon className="w-5 h-5" />
+            <span>{tab.label}</span>
           </button>
         ))}
       </nav>
 
       {/* Tab Content */}
-      {activeTab === 'profile' && (
-        <form className="space-y-4" onSubmit={onSubmitProfile}>
-          <div>
-            <label className="block mb-1 font-semibold text-gray-700" htmlFor="name">Name</label>
-            <input
-              name="name"
-              type="text"
-              defaultValue={user?.name || ''}
-              className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {isLoading ? 'Updating...' : 'Update Profile'}
-          </button>
-        </form>
-      )}
+      <div className="space-y-8">
+        {/* Profile Tab */}
+        {activeTab === 'profile' && (
+          <form className="space-y-6" onSubmit={onSubmitProfile}>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700" htmlFor="name">Name</label>
+              <input
+                name="name"
+                type="text"
+                defaultValue={user?.name || ''}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full md:w-auto px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-md hover:shadow-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isLoading ? 'Updating...' : 'Update Profile'}
+            </button>
+          </form>
+        )}
 
-      {activeTab === 'password' && (
-        <form className="space-y-4 max-w-md" onSubmit={onSubmitPassword}>
-          <div>
-            <label className="block mb-1 font-semibold text-gray-700" htmlFor="currentPassword">Current Password</label>
-            <input
-              name="currentPassword"
-              type="password"
-              className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-1 font-semibold text-gray-700" htmlFor="newPassword">New Password</label>
-            <input
-              name="newPassword"
-              type="password"
-              className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {isLoading ? 'Changing...' : 'Change Password'}
-          </button>
-        </form>
-      )}
+        {/* Password Tab */}
+        {activeTab === 'password' && (
+          <form className="space-y-6" onSubmit={onSubmitPassword}>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700" htmlFor="currentPassword">Current Password</label>
+              <input
+                name="currentPassword"
+                type="password"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700" htmlFor="newPassword">New Password</label>
+              <input
+                name="newPassword"
+                type="password"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+              <ShieldCheckIcon className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-blue-700">
+                After changing your password, you'll be logged out and need to sign in again with your new password.
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full md:w-auto px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-md hover:shadow-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isLoading ? 'Changing...' : 'Change Password'}
+            </button>
+          </form>
+        )}
 
-      {activeTab === 'delete' && (
-        <div className="max-w-md bg-red-50 border border-red-300 p-6 rounded">
-          <h3 className="text-red-700 text-lg font-semibold mb-4 flex items-center gap-2">
-            <TrashIcon className="w-6 h-6" /> Delete Account
-          </h3>
-          <p className="mb-6 text-red-600">
-            Deleting your account will permanently remove all your data. This action cannot be undone.
-            <br />
-            Are you sure you want to delete your account?
-          </p>
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-            disabled={isLoading}
-          >
-            Delete My Account
-          </button>
-
-          {showDeleteModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-              <div className="bg-white p-6 rounded shadow max-w-sm text-center">
-                <h4 className="font-bold text-lg mb-4 text-red-700">Confirm Deletion</h4>
-                <p className="mb-4">All your data will be permanently removed. Are you sure?</p>
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={handleDeleteAccount}
-                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Deleting...' : 'Yes, Delete'}
-                  </button>
-                  <button
-                    onClick={() => setShowDeleteModal(false)}
-                    className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
+        {/* Delete Account Tab */}
+        {activeTab === 'delete' && (
+          <div className="space-y-6">
+            <div className="flex items-start gap-4 p-6 bg-red-50 border border-red-200 rounded-xl">
+              <div className="bg-red-100 p-2 rounded-full">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-red-700 mb-2">Delete Your Account</h3>
+                <p className="text-red-600">
+                  This will permanently delete all your data including orders and personal information. 
+                  This action cannot be undone.
+                </p>
               </div>
             </div>
-          )}
-        </div>
-      )}
+
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className={`w-full md:w-auto px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-md hover:shadow-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isLoading}
+            >
+              Delete My Account
+            </button>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+                    <h4 className="text-xl font-bold text-gray-800">Confirm Account Deletion</h4>
+                  </div>
+                  <p className="mb-6 text-gray-600">
+                    Are you absolutely sure you want to delete your account? All your data will be permanently removed from our systems.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={handleDeleteAccount}
+                      className={`flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Deleting...' : 'Yes, Delete Permanently'}
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteModal(false)}
+                      className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

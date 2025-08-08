@@ -1,112 +1,174 @@
-import { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 import {
   HomeIcon,
   ShoppingBagIcon,
   CubeIcon,
   UsersIcon,
   TagIcon,
-  CogIcon,
-  ChartBarIcon,
-  Bars3Icon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+  ArrowLeftStartOnRectangleIcon,
+} from "@heroicons/react/24/outline";
+import LogoutButton from "../../components/layouts/LogoutButton";
 
-const AdminLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const location = useLocation();
+const tabs = [
+  {
+    name: "Dashboard",
+    path: "/admin/dashboard",
+    icon: HomeIcon,
+  },
+  {
+    name: "Products",
+    path: "/admin/products",
+    icon: CubeIcon,
+  },
+  {
+    name: "Orders",
+    path: "/admin/orders",
+    icon: ShoppingBagIcon,
+  },
+  {
+    name: "Customers",
+    path: "/admin/customers",
+    icon: UsersIcon,
+  },
+  {
+    name: "Users",
+    path: "/admin/users",
+    icon: TagIcon,
+  },
+];
 
-  const navItems = [
-    { name: 'Dashboard', path: '/admin/dashboard', icon: <HomeIcon className="w-5 h-5" /> },
-    { name: 'Products', path: '/admin/products', icon: <CubeIcon className="w-5 h-5" /> },
-    { name: 'Orders', path: '/admin/orders', icon: <ShoppingBagIcon className="w-5 h-5" /> },
-    { name: 'Customers', path: '/admin/customers', icon: <UsersIcon className="w-5 h-5" /> },
-    { name: 'Users', path: '/admin/users', icon: <TagIcon className="w-5 h-5" /> },
-  ];
+export default function AdminLayout() {
+  const { pathname } = useLocation();
+  const [expanded, setExpanded] = useState(true);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-20 bg-black opacity-50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
+    <div className="min-h-screen flex bg-gradient-to-br from-[#f4f3ff] to-[#dddfee]">
       {/* Sidebar */}
-      <aside 
-        className={`fixed inset-y-0 left-0 z-30 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:inset-0`}
+      <div
+        className={`
+          ${expanded ? "w-64" : "w-20"}
+          transition-all duration-300 bg-white shadow-lg rounded-2xl m-3 
+          flex flex-col justify-between
+        `}
       >
-        <div className="flex items-center justify-between p-4 border-b">
-          <h1 className="text-xl font-semibold text-gray-800">Admin Panel</h1>
-          <button 
-            onClick={() => setSidebarOpen(false)}
-            className="p-1 rounded-md lg:hidden"
-          >
-            <XMarkIcon className="w-6 h-6 text-gray-500" />
-          </button>
+        {/* Logo and Collapse Button */}
+        <div>
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <Link to="/">
+              <div className="rounded-full bg-violet-500 h-10 w-10 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">A</span>
+              </div>
+            </Link>
+            {expanded && (
+              <span className="ml-2 font-bold text-lg text-gray-700">ADMIN</span>
+            )}
+            <button
+              className="ml-auto"
+              onClick={() => setExpanded((p) => !p)}
+              aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              <svg
+                className="w-5 h-5 text-violet-500 cursor-pointer"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={expanded ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7"}
+                />
+              </svg>
+            </button>
+          </div>
+
+          {/* Navigation Tabs */}
+          <nav className="flex flex-col gap-1 mt-2">
+            {tabs.map((tab) => {
+              const isActive = pathname.startsWith(tab.path);
+              return (
+                <Link
+                  to={tab.path}
+                  key={tab.name}
+                  className={`
+                    relative group flex items-center gap-4 p-3 mx-3 my-1 rounded-lg cursor-pointer transition-all font-medium
+                    ${isActive
+                      ? "bg-violet-100 text-violet-600"
+                      : "text-gray-700 hover:bg-violet-50"}
+                  `}
+                  style={
+                    isActive && expanded
+                      ? { background: "#ece6fc", color: "#7c3aed" }
+                      : {}
+                  }
+                  aria-label={tab.name}
+                >
+                  <tab.icon className="w-6 h-6" />
+                  {expanded && <span>{tab.name}</span>}
+
+                  {/* Tooltip only when collapsed */}
+                  {!expanded && (
+                    <span
+                      className="
+                        absolute left-full top-1/2 -translate-y-1/2 ml-2
+                        bg-gray-700 text-white text-xs rounded px-2 py-1
+                        whitespace-nowrap
+                        opacity-0 group-hover:opacity-100
+                        pointer-events-none
+                        transition-opacity duration-300
+                        z-10
+                      "
+                    >
+                      {tab.name}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        <nav className="p-4">
-          <ul className="space-y-2">
-            {navItems.map((item) => (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={`flex items-center p-3 rounded-lg transition-colors
-                    ${location.pathname === item.path 
-                      ? 'bg-blue-100 text-blue-600' 
-                      : 'text-gray-700 hover:bg-gray-100'}`}
-                >
-                  <span className="mr-3">{item.icon}</span>
-                  <span>{item.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
- 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top header */}
-        <header className="bg-white shadow-sm z-10">
-          <div className="flex items-center justify-between p-4">
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-md lg:hidden"
+        {/* Bottom Section */}
+        <div className="flex flex-col gap-2 mb-4 border-t border-gray-100">
+          <div className="relative group mx-3">
+            <LogoutButton
+              className="cursor-pointer 
+                flex justify-center items-center gap-2 p-2 rounded-lg font-medium w-full
+                transition-all duration-200
+                text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700
+                hover:shadow-lg hover:scale-[1.03]
+              "
+              aria-label="Log out"
             >
-              <Bars3Icon className="w-6 h-6 text-gray-500" />
-            </button>
-            
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <button className="p-1 rounded-full hover:bg-gray-100">
-                  <span className="sr-only">Notifications</span>
-                  <div className="w-2 h-2 bg-red-500 rounded-full absolute top-0 right-0"></div>
-                </button>
-              </div>
-              <div className="flex items-center">
-                <img 
-                  src="https://via.placeholder.com/40" 
-                  alt="User" 
-                  className="w-8 h-8 rounded-full"
-                />
-                <span className="ml-2 text-sm font-medium">Admin User</span>
-              </div>
-            </div>
-          </div>
-        </header>
+              <ArrowLeftStartOnRectangleIcon className="w-5 h-5 opacity-80 group-hover:opacity-100" />
+              {expanded && <span>Log out</span>}
+            </LogoutButton>
 
-        {/* Main content area */}
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
-          <Outlet />
-        </main>
+            {!expanded && (
+              <span
+                className="
+                  absolute left-full top-1/2 -translate-y-1/2 ml-2
+                  bg-gray-700 text-white text-xs rounded px-2 py-1
+                  whitespace-nowrap
+                  opacity-0 group-hover:opacity-100
+                  pointer-events-none
+                  transition-opacity duration-300
+                  z-10
+                "
+              >
+                Log out
+              </span>
+            )} 
+          </div>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 m-3">
+        <Outlet />
       </div>
     </div>
   );
-};
-
-export default AdminLayout;
+}

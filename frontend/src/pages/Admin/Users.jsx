@@ -37,7 +37,7 @@ const Users = () => {
   };
 
   return (
-    <div>
+    <div className="w-full min-h-screen px-8 py-4 space-y-6 bg-white rounded-2xl shadow-lg border border-gray-100">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Users Management</h1>
       </div>
