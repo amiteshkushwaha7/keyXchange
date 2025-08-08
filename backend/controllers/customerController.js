@@ -111,7 +111,7 @@ const customerController = {
 
     // Fetch all orders for this customer and populate the product details
     const orders = await Order.find({ buyer: customerId })
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1 }) 
         .lean(); // Convert to plain JavaScript objects
 
     // Extract all unique product IDs from orders

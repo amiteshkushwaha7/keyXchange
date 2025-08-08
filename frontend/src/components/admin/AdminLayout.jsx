@@ -163,7 +163,7 @@ export default function AdminLayout() {
             )} 
           </div>
         </div>
-      </div>
+      </div> 
 
       {/* Content Area */}
       <div className="flex-1 m-3">

@@ -28,14 +28,40 @@ const orderController = {
     }),
 
     getMyOrders: catchAsync(async (req, res) => {
-        const orders = await Order.find({ buyer: req.user._id });
+        const orders = await Order.find({ buyer: req.user._id })
+            .select('-razorpaySignature -deliveryEmail -deliveryWhatsapp -_v')
+            .sort({ createdAt: -1 }) 
+            .lean();
+
         if (!orders || orders.length === 0) {
             throw new ApiError(404, 'No orders found');
         }
 
+        const productIds = [...new Set(orders.map(order => order.product))];
+        // console.log('Extracted product IDs:', productIds);
+
+        const boughtProducts = await Product.find({ _id: { $in: productIds } })
+            .select('-code -details -howToRedeem -termsAndConditions -isOneTimeUse -usageLimit -isSold -isActive -uploadedBy -_v -createdAt -updatedAt')
+            .lean();
+
+        // Create a map of products for quick lookup
+        const productMap = boughtProducts.reduce((map, product) => {
+            map[product._id.toString()] = product;
+            return map;
+        }, {});
+
+        const ordersWithProducts = orders.map(order => {
+            return {
+                ...order,
+                productDetails: productMap[order.product.toString()] || null
+            };
+        });
+
+        console.log(ordersWithProducts);
+
         new ApiResponse({
             statusCode: 200,
-            data: orders
+            data: ordersWithProducts
         }).send(res);
     }),
 

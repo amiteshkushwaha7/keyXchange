@@ -39,7 +39,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
     },
     isDelivered: {
-      type: Boolean,
+      type: Boolean, 
       default: false,
     },
     deliveryEmail: {

@@ -26,7 +26,6 @@ import PrivateRoute from './routes/PrivateRoute';
 import AccountLayout from './components/user/AccountLayout';
 import Profile from './pages/User/Profile';
 import Order from './pages/User/Order';
-import OrderDetails from './components/user/OrderDetails';
 
 // Admin components 
 import AdminRoute from './routes/AdminRoute';
@@ -134,7 +133,6 @@ function App() {
             <Route index element={<Navigate to="my-orders" replace />} />
             <Route path="profile" element={<Profile />} />
             <Route path="my-orders" element={<Order />} />
-            <Route path="my-orders/:orderId" element={<OrderDetails />} />
           </Route>
         </Route>
 

@@ -73,7 +73,7 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
                 <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200"> 
               {products.map((product) => (
                 <tr
                   key={product._id}

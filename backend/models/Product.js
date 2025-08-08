@@ -15,7 +15,7 @@ const productSchema = new mongoose.Schema(
       max: [100, 'Product subtitle must be at most 200 characters'],
     },
     code: {
-      type: String,
+      type: String, 
       required: [true, 'Product code is required'],
       trim: true,
     },
