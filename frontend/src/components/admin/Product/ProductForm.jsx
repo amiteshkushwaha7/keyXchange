@@ -6,7 +6,7 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
   const dispatch = useDispatch();
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -21,7 +21,8 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
     expiryDate: '',
     images: [],
     isOneTimeUse: false,
-    isActive: false
+    isActive: false,
+    productLink: ''
   });
 
   useEffect(() => {
@@ -41,6 +42,7 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
         isOneTimeUse: product.isOneTimeUse !== false,
         usageLimit: product.usageLimit || 1,
         isActive: product.isActive !== false,
+        productLink: product.productLink || ''
       });
     }
   }, [product]);
@@ -120,6 +122,10 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
       newErrors.expiryDate = 'Expiry date is required';
     }
 
+    if (formData.productLink && !/^https?:\/\/.+\..+/.test(formData.productLink)) {
+      newErrors.productLink = 'Please enter a valid URL';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -156,12 +162,9 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
       formDataToSend.append('images', file);
     });
 
-    console.log(formDataToSend); // this is not printing any data
-    console.log(formData); // this print data
-
     try {
       if (product && product._id) {
-        await dispatch(updateProduct(formDataToSend)).unwrap();
+        await dispatch(updateProduct({ id: product._id, data: formDataToSend })).unwrap();
       } else {
         await dispatch(createProduct(formDataToSend)).unwrap();
       }
@@ -301,6 +304,18 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
             maxLength={100}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
           />
+        </div>
+        <div className="mt-4 space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Product Link</label>
+          <input
+            type="url"
+            name="productLink"
+            value={formData.productLink}
+            onChange={handleChange}
+            className={`block w-full rounded-md ${errors.productLink ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border`}
+            placeholder="https://example.com/product"
+          />
+          {errors.productLink && <p className="mt-1 text-sm text-red-600">{errors.productLink}</p>}
         </div>
         {renderArrayField('details', 'Details', 'Product details')}
       </div>

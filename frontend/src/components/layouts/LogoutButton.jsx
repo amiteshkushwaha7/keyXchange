@@ -11,7 +11,7 @@ const LogoutButton = ({ children, className }) => {  // Add `children` and `clas
     navigate('/login'); 
   };
 
-  return (
+  return ( 
     <button onClick={handleLogout} className={className}>
       {children || 'Logout'}  {/* Render children if provided, else fallback to "Logout" */}
     </button>

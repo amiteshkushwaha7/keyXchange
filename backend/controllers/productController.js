@@ -76,7 +76,8 @@ const productController = {
             isOneTimeUse,
             usageLimit,
             isSold,
-            isActive
+            isActive,
+            productLink
         } = req.body;
 
         // Process images from uploaded files
@@ -102,6 +103,7 @@ const productController = {
             isSold,
             isActive,
             images,
+            productLink,
             uploadedBy: req.user._id
         });
 

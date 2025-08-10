@@ -83,6 +83,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    productLink: {
+      type: String,
+      trim: true,
+    },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

@@ -41,7 +41,7 @@ const orderController = {
         // console.log('Extracted product IDs:', productIds);
 
         const boughtProducts = await Product.find({ _id: { $in: productIds } })
-            .select('-code -details -howToRedeem -termsAndConditions -isOneTimeUse -usageLimit -isSold -isActive -uploadedBy -_v -createdAt -updatedAt')
+            .select('-code -details -howToRedeem -termsAndConditions -isOneTimeUse -usageLimit -isSold -isActive -productLink -uploadedBy -_v -createdAt -updatedAt')
             .lean();
 
         // Create a map of products for quick lookup

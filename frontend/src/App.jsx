@@ -8,7 +8,7 @@ import { loadUser } from './features/auth/authSlice';
 import Navbar from './components/layouts/Navbar';
 // import NavigationBar from './components/layouts/NavigationBar';
 // import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/Login/Login';
+import Login from './pages/Login/Login'; 
 import Register from './pages/Register/Register';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
@@ -75,7 +75,6 @@ function App() {
   //   initializeAuth();
   // }, [dispatch, navigate, initialAuthCheckComplete]);
 
-
   // useEffect(() => {
   //   const initializeAuth = async () => {
   //     try {
@@ -124,8 +123,6 @@ function App() {
         <Route path="/unauthorized" element={<Unauthorized />} />
 
         <Route path="/products/:id" element={<ProductDetails />} />
-        {/* <Route path="/orders/create" element={<CreateOrder />} /> */}
-
 
         {/* User routes */}
         <Route element={<PrivateRoute />}>
