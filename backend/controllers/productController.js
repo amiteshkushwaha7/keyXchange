@@ -60,11 +60,12 @@ const productController = {
     }),
 
     getAllProducts: catchAsync(async (req, res) => {
-        const products = await Product.find();
+
+        const products = await Product.find().sort({ createdAt: -1 });
+
         if (!products || products.length === 0) {
             throw new ApiError(404, 'No products found');
         }
-        // console.log(products);
 
         new ApiResponse({
             statusCode: 200,

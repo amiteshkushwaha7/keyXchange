@@ -103,6 +103,11 @@ const Products = () => {
     );
   };
 
+  // Filter products to show only active/not sold products
+  const activeProducts = products.filter(product => 
+    product.isActive && !product.isSold && product.usageLimit > 0
+  );
+
   return (
     <div className="bg-gray-50 min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
@@ -111,7 +116,7 @@ const Products = () => {
             <p>Loading...</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {activeProducts.map((product) => (
                 <ProductCard
                   key={product._id}
                   product={product}

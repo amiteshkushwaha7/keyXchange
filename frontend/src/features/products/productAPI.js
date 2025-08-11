@@ -11,7 +11,7 @@ const productAPI = {
     const res = await api.get(`/products/${id}`);
     return res.data;
   },
-
+ 
   createProductAPI: async (data) => {
     const res = await api.post('/products/create', data);
     return res.data;
@@ -38,4 +38,4 @@ const productAPI = {
   }
 };
 
-export default productAPI;
+export default productAPI; 

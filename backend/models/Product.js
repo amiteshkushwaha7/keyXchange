@@ -46,7 +46,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Product category is required'],
-      enum: ["coupon", "voucher", "gift_card", "software_key", "membership", "other"],
+      enum: ["Coupon", "Voucher", "Gift Card", "Software Key", "Membership", "Other"],
     },
     company: {
       type: String,
@@ -75,7 +75,7 @@ const productSchema = new mongoose.Schema(
       default: 1,
       min: [1, 'Usage limit must be at least 1'],
     },
-    isSold: { 
+    isSold: {  
       type: Boolean,
       default: false,
     },

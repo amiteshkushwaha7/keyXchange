@@ -123,7 +123,7 @@ const productSlice = createSlice({
     });
 
     // Search Products
-    addCommonCases(searchProducts);
+    addCommonCases(searchProducts); 
     builder.addCase(searchProducts.fulfilled, (state, action) => {
       state.loading = false;
       state.products = action.payload;
