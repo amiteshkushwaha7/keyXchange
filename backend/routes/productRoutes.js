@@ -26,7 +26,9 @@ router.route('/:id')
         upload.array('images', 5),
         productController.updateProduct
     );
-    
+
+router.route('/:id/similar').get(productController.getSimilarProducts);
+
 router.route('/search').get(productController.searchProducts);
 
 export default router;

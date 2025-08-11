@@ -6,61 +6,6 @@ import cloudinary from '../config/cloudinary.js';
 
 const productController = {
 
-    // createProduct: catchAsync(async (req, res) => {
-    //     const {
-    //         title,
-    //         description,
-    //         howToUse,
-    //         termsAndConditions,
-    //         code,
-    //         category,
-    //         company,
-    //         price,
-    //         expiryDate,
-    //         isOneTimeUse,
-    //         usageLimit,
-    //         stock,
-    //         isSold,
-    //         isActive
-    //     } = req.body;
-
-    //     console.log(req.body);
-
-    //     const images = req.files?.map(file => ({
-    //         url: file.path,
-    //         public_id: file.filename
-    //     })) || [];
-
-    //     const product = await Product.create({
-    //         title,
-    //         description,
-    //         howToUse,
-    //         termsAndConditions,
-    //         code,
-    //         category,
-    //         company,
-    //         price,
-    //         expiryDate,
-    //         isOneTimeUse,
-    //         usageLimit,
-    //         stock,
-    //         isSold,
-    //         isActive,
-    //         images,
-    //         uploadedBy: req.user._id
-    //     });
-
-    //     console.log(product);
-
-    //     new ApiResponse({
-    //         statusCode: 201,
-    //         message: 'Product created successfully',
-    //         data: product
-    //     }).send(res);
-    // }),
-
-    // READ All Products
-
     createProduct: catchAsync(async (req, res) => {
         const {
             title,
@@ -113,7 +58,6 @@ const productController = {
             data: product
         }).send(res);
     }),
-
 
     getAllProducts: catchAsync(async (req, res) => {
         const products = await Product.find();
@@ -287,7 +231,7 @@ const productController = {
         //     images,
         //     uploadedBy: req.user._id
         // });
-        
+
         new ApiResponse({
             statusCode: 200,
             message: 'Product updated successfully',
@@ -319,6 +263,44 @@ const productController = {
             message: 'Product deleted successfully'
         }).send(res);
     }),
+
+    // GET Similar Product
+    getSimilarProducts: catchAsync(async (req, res) => {
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            throw new ApiError(404, 'Product not found');
+        }
+
+        // Get 7 products from same company (excluding current product)
+        const similarByCompany = await Product.find({
+            company: product.company,
+            _id: { $ne: product._id }
+        })
+        .sort({ createdAt: -1 })
+        .limit(7);
+
+        console.log('company', similarByCompany);
+
+        const similarByCategory = await Product.find({
+            category: product.category,
+            _id: { $ne: product._id },
+            company: { $ne: product.company } // Exclude same company products
+        })
+        .sort({ createdAt: -1 })
+        .limit(7);
+
+        console.log('category', similarByCategory);
+
+        new ApiResponse({
+            statusCode: 200,
+            message: 'Similar products fetched successfully',
+            data: {
+                ProductsByCompany: similarByCompany,
+                ProductsByCategory: similarByCategory
+            }
+        }).send(res);
+    })
 };
 
 export default productController; 

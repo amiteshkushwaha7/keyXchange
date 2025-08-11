@@ -75,7 +75,7 @@ const productSchema = new mongoose.Schema(
       default: 1,
       min: [1, 'Usage limit must be at least 1'],
     },
-    isSold: {
+    isSold: { 
       type: Boolean,
       default: false,
     },

@@ -15,7 +15,7 @@ const productAPI = {
   createProductAPI: async (data) => {
     const res = await api.post('/products/create', data);
     return res.data;
-  },
+  }, 
 
   updateProductAPI: async ({ id, data }) => {
     const res = await api.put(`/products/${id}`, data);
@@ -24,6 +24,11 @@ const productAPI = {
 
   deleteProductAPI: async (id) => {
     const res = await api.delete(`/products/${id}`);
+    return res.data;
+  },
+
+  getSimilarProducts: async (id) => {
+    const res = await api.get(`/products/${id}/similar`);
     return res.data;
   },
 

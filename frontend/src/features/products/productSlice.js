@@ -20,11 +20,13 @@ export const getProductById = createProductThunk('getById', productAPI.getProduc
 export const createProduct = createProductThunk('create', productAPI.createProductAPI);
 export const updateProduct = createProductThunk('update', productAPI.updateProductAPI);
 export const deleteProduct = createProductThunk('delete', productAPI.deleteProductAPI);
+export const getSimilarProducts = createProductThunk('getSimilar', productAPI.getSimilarProducts);
 export const searchProducts = createProductThunk('search', productAPI.searchProducts);
 
 const initialState = {
   products: [],
   currentProduct: null,
+  similarProducts: [],
   loading: false,
   error: null,
   message: null
@@ -43,6 +45,9 @@ const productSlice = createSlice({
     resetCurrentProduct: (state) => {
       state.currentProduct = null;
     },
+    clearSimilarProducts: (state) => {
+      state.similarProducts = [];
+    },
     clearProductState: (state) => {
       state.products = [];
       state.currentProduct = null;
@@ -59,7 +64,7 @@ const productSlice = createSlice({
           state.loading = true;
           state.error = null;
         })
-        .addCase(thunk.rejected, (state, action) => {
+        .addCase(thunk.rejected, (state, action) => { 
           state.loading = false;
           state.error = action.payload?.message || 'Request failed';
         });
@@ -109,6 +114,14 @@ const productSlice = createSlice({
       state.message = 'Product deleted successfully';
     });
 
+    // Get similar products
+    addCommonCases(getSimilarProducts);
+    builder.addCase(getSimilarProducts.fulfilled, (state, action) => {
+      state.loading = false;
+      state.similarProducts = action.payload;
+      // console.log(action.payload);
+    });
+
     // Search Products
     addCommonCases(searchProducts);
     builder.addCase(searchProducts.fulfilled, (state, action) => {
@@ -123,6 +136,7 @@ export const {
   clearProductError, 
   clearProductMessage, 
   resetCurrentProduct, 
+  clearSimilarProducts, 
   clearProductState 
 } = productSlice.actions;
 

@@ -103,7 +103,7 @@ const OrderButton = ({ product }) => {
       <button
         onClick={handleOrder}
         disabled={loading}
-        className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400"
+        className="w-full bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400"
       >
         {loading ? 'Processing...' : 'Buy Now'}
       </button>
