@@ -31,13 +31,13 @@ const orderController = {
     getMyOrders: catchAsync(async (req, res) => {
         const orders = await Order.find({ buyer: req.user._id })
             .select('-razorpaySignature -deliveryEmail -deliveryWhatsapp -_v')
-            .sort({ createdAt: -1 }) 
+            .sort({ createdAt: -1 })
             .lean();
 
         if (!orders || orders.length === 0) {
             throw new ApiError(404, 'No orders found');
         }
- 
+
         const productIds = [...new Set(orders.map(order => order.product))];
         // console.log('Extracted product IDs:', productIds);
 
@@ -50,7 +50,7 @@ const orderController = {
             map[product._id.toString()] = product;
             return map;
         }, {});
- 
+
         const ordersWithProducts = orders.map(order => {
             return {
                 ...order,
@@ -104,8 +104,6 @@ const orderController = {
     verifyPayment: catchAsync(async (req, res) => {
         const { orderId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
 
-        console.log(req.body);
-
         if (!razorpayPaymentId || !razorpaySignature || !razorpayOrderId) {
             throw new ApiError(400, 'Payment verification details are required');
         }
@@ -121,7 +119,7 @@ const orderController = {
         }
 
         const order = await Order.findByIdAndUpdate(
-            orderId, 
+            orderId,
             {
                 razorpayPaymentId,
                 razorpayOrderId,
@@ -131,9 +129,28 @@ const orderController = {
             { new: true }
         );
 
-        if (!order) {
+        if (!order) 
             throw new ApiError(404, 'Order not found');
-        }
+
+        const buyer = await User.findById(order.buyer);
+
+        let emailText = `Dear ${buyer.name},\n\n`;
+        emailText += `Thank you for your order! We’re excited to let you know that your order #${order._id} has been confirmed and is now being processed.\n\n`;
+        emailText += `Order Details:\n`
+        emailText += `Order Number: ${order._id}\n`;
+        emailText += `Order Date: ${order.createdAt.toDateString()}\n`;
+        emailText += `Total Amount: ${order.amountPaid}\n\n`;
+        emailText += `Your order will be prepared and shipped within 1 hour.\n\n`;
+        emailText += `Thank you for shopping with us!.\n\n`;
+        emailText += `Best regards,\n`;
+        emailText += `The KeyXchange Team\n`;
+
+        await sendEmail({
+            from: process.env.SENDER_EMAIL,
+            to: buyer.email,
+            subject: 'Your Order is Conformed!',
+            text: emailText
+        })
 
         new ApiResponse({
             statusCode: 200,
@@ -149,7 +166,7 @@ const orderController = {
             throw new ApiError(404, 'Order not found');
         }
 
-        cosole.log(`Order with ID ${id} deleted successfully`);
+        console.log(`Order with ID ${id} deleted successfully`);
 
         new ApiResponse({
             statusCode: 200,
@@ -167,28 +184,17 @@ const orderController = {
 
         // Find the order and populate the products and user
         const order = await Order.findById(id);
-
-        if (!order) {
+        if (!order) 
             throw new ApiError(404, 'Order not found');
-        }
 
         const product = await Product.findById(order.product);
-
-        if (!product) {
+        if (!product) 
             throw new ApiError(404, 'Product not found');
-        }
 
         const buyer = await User.findById(order.buyer);
-
-        if (!buyer) {
+        if (!buyer) 
             throw new ApiError(404, 'Buyer/User not found');
-        }
 
-        console.log('order', order);
-        console.log('product', product);
-        console.log('buyer', buyer);
-
-        // If status is completed, send the products to the user
         let emailText = `Dear ${buyer.name},\n\n`;
         if (status === 'completed') {
             // Format the email content with all product details
@@ -196,13 +202,43 @@ const orderController = {
             emailText += `Order ID: ${order._id}\n`;
             emailText += `Order Date: ${order.createdAt.toDateString()}\n\n`;
             emailText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            emailText += `Title: ${product.title}\n`;
-            emailText += `Description: ${product.description}\n`;
+            emailText += `\nTitle: ${product.title}\n`;
+            emailText += `Subtitle: ${product.subtitle}\n`;
             emailText += `Product Code: ${product.code}\n`;
             emailText += `Category: ${product.category}\n`;
             emailText += `Company: ${product.company}\n`;
             emailText += `Price: ₹${product.price}\n`;
             emailText += `Expiry Date: ${new Date(product.expiryDate).toDateString()}\n`;
+            emailText += `Link: ${product.productLink}\n`;
+
+            emailText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+
+            if (product.details && product.details.length > 0) {
+                emailText += `\nProduct Details:\n`;
+                product.details.forEach((detail, detailIndex) => {
+                    emailText += `Detail ${detailIndex + 1}: ${detail}\n`;
+                });
+            }
+
+            emailText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+
+            if (product.howToRedeem && product.howToRedeem.length > 0) {
+                emailText += `\nHow to Redeem:\n`;
+                product.howToRedeem.forEach((step, stepIndex) => {
+                    emailText += `Step ${stepIndex + 1}: ${step}\n`;
+                });
+            }
+
+            emailText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+
+            if (product.termsAndConditions && product.termsAndConditions.length > 0) {
+                emailText += `\nTerms & Conditions:\n`;
+                product.termsAndConditions.forEach((term, termIndex) => {
+                    emailText += `Term ${termIndex + 1}: ${term}\n`;
+                });
+            }
+
+            emailText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
 
             if (product.images && product.images.length > 0) {
                 emailText += `\nProduct Images:\n`;
@@ -211,33 +247,24 @@ const orderController = {
                 });
             }
 
-            if (product.howToUse) {
-                emailText += `\nHow to Use:\n${product.howToUse}\n`;
-            }
+            console.log(emailText);
 
-            if (product.termsAndConditions) {
-                emailText += `\nTerms & Conditions:\n${product.termsAndConditions}\n`;
-            }
+            // Send the email
 
-            emailText += '\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+            await sendEmail({
+                from: process.env.SENDER_EMAIL,
+                to: buyer.email,
+                subject: 'Your Order is Completed - Product Details',
+                text: emailText
+            });
+
+            order.isDelivered = true;
+            await order.save({ validateBeforeSave: false });
+
+            product.isSold = true;
+            product.usageLimit = product.usageLimit - 1;
+            product.save({ validateBeforeSave: false });
         }
-
-        console.log(emailText);
-
-        // Send the email
-        await sendEmail({
-            from: process.env.SENDER_EMAIL,
-            to: buyer.email,
-            subject: 'Your Order is Completed - Product Details',
-            text: emailText
-        });
-
-        order.isDelivered = true;
-        await order.save({ validateBeforeSave: false });
-
-        product.isSold = true;
-        product.usageLimit = product.usageLimit - 1;
-        product.save({ validateBeforeSave: false });
 
         return new ApiResponse({
             statusCode: 200,

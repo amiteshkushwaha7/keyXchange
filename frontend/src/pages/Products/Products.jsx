@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getAllProducts } from '../../features/admin/adminSlice';
 import { BookmarkIcon } from '@heroicons/react/24/outline';
+import HowItWorks from '../../components/layouts/HowItWorks';
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -127,6 +128,8 @@ const Products = () => {
           )}
         </div>
       </div>
+
+      <HowItWorks />
     </div>
   );
 };

@@ -53,12 +53,12 @@ const productSchema = new mongoose.Schema(
       required: [true, 'Company name is required'],
       trim: true,
     },
-    price: {
+    price: { 
       type: Number,
       required: [true, 'Price is required'],
       min: [0, 'Price must be a positive number'],
     },
-    images: [{
+    images: [{ 
       url: String,
       public_id: String
     }],

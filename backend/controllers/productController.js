@@ -276,7 +276,10 @@ const productController = {
         // Get 7 products from same company (excluding current product)
         const similarByCompany = await Product.find({
             company: product.company,
-            _id: { $ne: product._id }
+            _id: { $ne: product._id },
+            isActive: true, 
+            useLimit: { $gt: 0 },
+            isSold: false
         })
         .sort({ createdAt: -1 })
         .limit(7);
@@ -286,7 +289,10 @@ const productController = {
         const similarByCategory = await Product.find({
             category: product.category,
             _id: { $ne: product._id },
-            company: { $ne: product.company } // Exclude same company products
+            // company: { $ne: product.company } 
+            isActive: true, 
+            useLimit: { $gt: 0 },
+            isSold: false
         })
         .sort({ createdAt: -1 })
         .limit(7);

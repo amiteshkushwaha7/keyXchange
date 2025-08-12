@@ -2,15 +2,15 @@ import { useSelector, useDispatch } from "react-redux";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { 
-  updatePassword, 
-  logoutUser, 
-  updateProfile, 
-  deleteAccount 
+import {
+  updatePassword,
+  logoutUser,
+  updateProfile,
+  deleteAccount
 } from "../../features/auth/authSlice";
-import { 
-  LockClosedIcon, 
-  TrashIcon, 
+import {
+  LockClosedIcon,
+  TrashIcon,
   PencilSquareIcon,
   UserCircleIcon,
   ShieldCheckIcon,
@@ -93,13 +93,21 @@ const Profile = () => {
       setIsLoading(false);
     }
   };
- 
+
   return (
-    <div className="w-full min-h-screen mx-auto px-8 py-4 bg-white rounded-2xl shadow-lg border border-gray-100">
+    <div className="w-full min-h-[calc(100vh-2rem)] mx-auto p-4 md:px-8 md:py-6 bg-white rounded-2xl shadow-lg border border-gray-100">
       {/* Profile Header */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
         <div className="bg-violet-100 p-3 rounded-full">
-          <UserCircleIcon className="h-10 w-10 text-violet-600" />
+          <img
+            src={
+              'https://ui-avatars.com/api/?name=' +
+              encodeURIComponent(user.name || 'User') +
+              '&background=random'
+            }
+            alt={user.name}
+            className="w-14 h-14 rounded-full border-4 border-white shadow-lg"
+          />
         </div>
         <div>
           <h2 className="text-lg font-bold text-gray-800">MY ACCOUNT</h2>
@@ -108,7 +116,7 @@ const Profile = () => {
       </div>
 
       {/* Tabs */}
-      <nav className="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-8">
+      <nav className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1 bg-gray-100 p-1 rounded-xl mb-8">
         {[
           { id: 'profile', icon: PencilSquareIcon, label: 'Profile' },
           { id: 'password', icon: LockClosedIcon, label: 'Password' },
@@ -117,9 +125,9 @@ const Profile = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === tab.id
-                ? 'bg-white shadow-sm text-violet-600 font-medium'
-                : 'text-gray-600 hover:text-violet-600'
+            className={`flex items-center justify-center sm:justify-start gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === tab.id
+              ? 'bg-white shadow-sm text-violet-600 font-medium'
+              : 'text-gray-600 hover:text-violet-600'
               }`}
             type="button"
           >
@@ -147,7 +155,7 @@ const Profile = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full md:w-auto px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-md hover:shadow-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-md hover:shadow-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isLoading ? 'Updating...' : 'Update Profile'}
             </button>
@@ -184,7 +192,7 @@ const Profile = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full md:w-auto px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-md hover:shadow-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-md hover:shadow-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isLoading ? 'Changing...' : 'Change Password'}
             </button>
@@ -194,14 +202,14 @@ const Profile = () => {
         {/* Delete Account Tab */}
         {activeTab === 'delete' && (
           <div className="space-y-6">
-            <div className="flex items-start gap-4 p-6 bg-red-50 border border-red-200 rounded-xl">
+            <div className="flex flex-col sm:flex-row items-start gap-4 p-6 bg-red-50 border border-red-200 rounded-xl">
               <div className="bg-red-100 p-2 rounded-full">
                 <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-red-700 mb-2">Delete Your Account</h3>
                 <p className="text-red-600">
-                  This will permanently delete all your data including orders and personal information. 
+                  This will permanently delete all your data including orders and personal information.
                   This action cannot be undone.
                 </p>
               </div>
@@ -209,7 +217,7 @@ const Profile = () => {
 
             <button
               onClick={() => setShowDeleteModal(true)}
-              className={`w-full md:w-auto px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-md hover:shadow-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-md hover:shadow-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={isLoading}
             >
               Delete My Account

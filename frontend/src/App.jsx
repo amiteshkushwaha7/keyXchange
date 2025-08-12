@@ -6,15 +6,16 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { loadUser } from './features/auth/authSlice';
 
 import Navbar from './components/layouts/Navbar';
+// import NavigationBar from './components/layouts/NavigationBar';
 import Category from './components/layouts/Category';
-import Company from './components/layouts/Category';
+import Company from './components/layouts/Company';
 import Footer from './components/layouts/Footer';
 import Contact from './pages/Contact/Contact';
 import About from './pages/About/About';
 import PrivacyPolicy from './pages/Privacy Policy/Privacy';
 import Terms from './pages/T&C/T&C';
 import FAQ from './pages/FAQ/FAQ';
-// import NavigationBar from './components/layouts/NavigationBar';
+
 // import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
@@ -121,6 +122,7 @@ function App() {
     <>
       <Navbar />
       {/* <NavigationBar/> */}
+
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
@@ -135,13 +137,13 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<Terms />} />
         <Route path="/faq" element={<FAQ />} />
-
+ 
         <Route path="/products/:id" element={<ProductDetails />} />
 
         {/* User routes */}
         <Route element={<PrivateRoute />}>
           <Route path="/account" element={<AccountLayout />}>
-            <Route index element={<Navigate to="my-orders" replace />} />
+            <Route index element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<Profile />} />
             <Route path="my-orders" element={<Order />} />
           </Route>

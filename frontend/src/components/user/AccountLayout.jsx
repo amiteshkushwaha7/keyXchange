@@ -145,7 +145,7 @@ export default function AccountLayout() {
                 >
                   Log out
                 </span>
-              )}
+              )} 
             </div>
           )}
         </div>

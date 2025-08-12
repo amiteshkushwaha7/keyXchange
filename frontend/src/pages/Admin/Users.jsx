@@ -37,7 +37,7 @@ const Users = () => {
             <div className="w-full md:w-64 lg:w-96">
               <SearchInput
                 placeholder="Search users..."
-                value={searchTerm}
+                value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)} 
               />
             </div>

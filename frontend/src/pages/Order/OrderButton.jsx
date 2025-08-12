@@ -13,7 +13,7 @@ const OrderButton = ({ product }) => {
     let orderIdToDelete = null; // Track the created order ID for possible cleanup
 
     try {
-      // 1. Create an order
+      // 1. Create an order 
       const result = await dispatch(
         createOrder({
           productId: product._id,

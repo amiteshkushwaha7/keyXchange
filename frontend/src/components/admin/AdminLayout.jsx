@@ -51,7 +51,7 @@ export default function AdminLayout() {
           transition-all duration-300 bg-white shadow-lg rounded-2xl m-3 
           flex flex-col justify-between
         `}
-      >
+      > 
         {/* Logo and Collapse Button */}
         <div>
           <div className="flex items-center justify-between px-4 pt-4 pb-2">

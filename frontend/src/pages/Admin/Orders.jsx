@@ -20,7 +20,7 @@ const Orders = () => {
 
   useEffect(() => {
     dispatch(getAllOrders());
-  }, [dispatch]);
+  }, [dispatch]); 
 
   // Filter orders based on search and status
   const displayOrders = orders.filter(order => {
@@ -83,7 +83,7 @@ const Orders = () => {
         }}
       />
     </div>
-  );
+  ); 
 };
 
 export default Orders;

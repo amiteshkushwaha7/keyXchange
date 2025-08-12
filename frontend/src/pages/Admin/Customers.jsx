@@ -23,7 +23,7 @@ const Customers = () => {
 
   const handleViewDetails = (customerId) => {
     navigate(`/admin/customers/${customerId}`);
-  };
+  }; 
 
   return (
     <div className="w-full min-h-screen p-4 md:p-8 space-y-6 bg-gray-50 rounded-2xl">
