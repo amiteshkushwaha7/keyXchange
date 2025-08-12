@@ -44,4 +44,4 @@ const HowToBuy = ({ product }) => {
   );
 };
 
-export default HowToBuy;
+export default HowToBuy; 

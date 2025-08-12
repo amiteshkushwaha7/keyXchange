@@ -1,49 +1,59 @@
-// Company.jsx
+import { motion } from 'framer-motion';
+
 const Company = () => {
+  const sections = [
+    {
+      title: "About Us",
+      items: ["Our Story", "Leadership", "Careers", "Press Center"]
+    },
+    {
+      title: "Services",
+      items: ["Fast Delivery", "Zepto Pass", "Zepto Cafe", "Bulk Orders"]
+    },
+    {
+      title: "Legal",
+      items: ["Terms of Use", "Privacy Policy", "Security", "Compliance"]
+    },
+    {
+      title: "Partners",
+      items: ["Sell on Zepto", "Advertise", "Affiliate Program", "API Access"]
+    },
+    {
+      title: "Contact",
+      items: ["Help Center", "Live Chat", "Email Support", "Store Locator"]
+    }
+  ];
+
   return (
-    <div className="bg-white p-4">
-      <h2 className="text-lg font-semibold mb-4">Company</h2>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="space-y-2">
-          <p className="font-medium">About Us</p>
-          <p className="text-gray-600">Our Story</p>
-          <p className="text-gray-600">Leadership</p>
-          <p className="text-gray-600">Careers</p>
-          <p className="text-gray-600">Press Center</p>
+    <div className="bg-gray-100 p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100"
+      >
+        <h2 className="text-2xl font-bold text-gray-900 mb-8">Company</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+          {sections.map((section, index) => (
+            <div key={index} className="space-y-4">
+              <p className="font-semibold text-lg text-gray-900 border-b border-gray-200 pb-2">
+                {section.title}
+              </p>
+              <div className="space-y-3">
+                {section.items.map((item, i) => (
+                  <motion.p
+                    key={i}
+                    whileHover={{ x: 5 }}
+                    className="text-sm text-gray-600 hover:text-purple-600 cursor-pointer transition-colors duration-200"
+                  >
+                    {item}
+                  </motion.p>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-
-        <div className="space-y-2">
-          <p className="font-medium">Services</p>
-          <p className="text-gray-600">Fast Delivery</p>
-          <p className="text-gray-600">Zepto Pass</p>
-          <p className="text-gray-600">Zepto Cafe</p>
-          <p className="text-gray-600">Bulk Orders</p>
-        </div>
-
-        <div className="space-y-2">
-          <p className="font-medium">Legal</p>
-          <p className="text-gray-600">Terms of Use</p>
-          <p className="text-gray-600">Privacy Policy</p>
-          <p className="text-gray-600">Security</p>
-          <p className="text-gray-600">Compliance</p>
-        </div>
-
-        <div className="space-y-2">
-          <p className="font-medium">Partners</p>
-          <p className="text-gray-600">Sell on Zepto</p>
-          <p className="text-gray-600">Advertise</p>
-          <p className="text-gray-600">Affiliate Program</p>
-          <p className="text-gray-600">API Access</p>
-        </div>
-
-        <div className="space-y-2">
-          <p className="font-medium">Contact</p>
-          <p className="text-gray-600">Help Center</p>
-          <p className="text-gray-600">Live Chat</p>
-          <p className="text-gray-600">Email Support</p>
-          <p className="text-gray-600">Store Locator</p>
-        </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

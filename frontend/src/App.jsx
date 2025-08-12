@@ -53,67 +53,10 @@ function App() {
 
   const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
-  // Load user on app mount
   useEffect(() => {
     dispatch(loadUser());
   }, [dispatch]);
 
-  // const [initialAuthCheckComplete, setInitialAuthCheckComplete] = useState(false);
-
-  // useEffect(() => {
-  //   const initializeAuth = async () => {
-  //     try {
-  //       if (!initialAuthCheckComplete) {
-  //         // Call refreshUser thunk — it should internally call /auth/refresh
-  //         await dispatch(refreshUser()).unwrap();
-
-  //         // If refresh succeeded, user is authenticated
-  //         setInitialAuthCheckComplete(true);
-  //       }
-  //     } catch (error) {
-  //       // On error, user is considered logged out
-  //       dispatch(clearAuthState());
-  //       setInitialAuthCheckComplete(true);
-
-  //       if (window.location.pathname !== '/login') {
-  //         navigate('/login', { replace: true });
-  //       }
-  //     }
-  //   };
-
-  //   initializeAuth();
-  // }, [dispatch, navigate, initialAuthCheckComplete]);
-
-  // useEffect(() => {
-  //   const initializeAuth = async () => {
-  //     try {
-  //       // Only attempt refresh if we haven't completed initial check
-  //       if (!initialAuthCheckComplete) {
-  //         const result = await dispatch(refreshUser()).unwrap();
-
-  //         // If no token received, treat as unauthenticated
-  //         if (!result?.accessToken) {
-  //           throw new Error('No access token received');
-  //         }
-
-  //         setInitialAuthCheckComplete(true);
-  //       }
-  //     } catch (error) {
-  //       // Clear auth state and mark check as complete
-  //       dispatch(clearAuthState());
-  //       setInitialAuthCheckComplete(true);
-
-  //       // Only navigate if we're not already on login page
-  //       if (window.location.pathname !== '/login') {
-  //         navigate('/', { replace: true });
-  //       }
-  //     }
-  //   };
-
-  //   initializeAuth();
-  // }, [dispatch, navigate, initialAuthCheckComplete]);
-
-  // Show loading only if we're still checking initial auth
   if (loading) {
     return <LoadingScreen />;
   }

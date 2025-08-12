@@ -110,7 +110,7 @@ const Products = () => {
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen p-6">
+    <div className="bg-gray-100 min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-4">
           {isLoading ? (
