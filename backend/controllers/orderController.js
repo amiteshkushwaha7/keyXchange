@@ -16,7 +16,8 @@ dotenv.config();
 
 const orderController = {
     getAllOrders: catchAsync(async (req, res) => {
-        const orders = await Order.find();
+        const orders = await Order.find().sort({ createdAt: -1 });
+
         if (!orders || orders.length === 0) {
             throw new ApiError(404, 'No orders found');
         }
@@ -36,7 +37,7 @@ const orderController = {
         if (!orders || orders.length === 0) {
             throw new ApiError(404, 'No orders found');
         }
-
+ 
         const productIds = [...new Set(orders.map(order => order.product))];
         // console.log('Extracted product IDs:', productIds);
 
@@ -49,7 +50,7 @@ const orderController = {
             map[product._id.toString()] = product;
             return map;
         }, {});
-
+ 
         const ordersWithProducts = orders.map(order => {
             return {
                 ...order,
@@ -120,7 +121,7 @@ const orderController = {
         }
 
         const order = await Order.findByIdAndUpdate(
-            orderId,
+            orderId, 
             {
                 razorpayPaymentId,
                 razorpayOrderId,

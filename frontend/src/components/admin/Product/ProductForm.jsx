@@ -186,12 +186,12 @@ const ProductForm = ({ product, isLoading, onSuccess }) => {
   };
 
   const categories = [
-    'coupon',
-    'voucher',
-    'gift_card',
-    'software_key',
-    'membership',
-    'other'
+    'Coupon',
+    'Voucher',
+    'Gift Card',
+    'Software Key',
+    'Membership',
+    'Other'
   ];
 
   const renderArrayField = (fieldName, label, placeholder) => {

@@ -22,6 +22,9 @@ export default function Navbar() {
     { name: 'Blog', href: '/blog', icon: BookOpenIcon },
     { name: 'Contact', href: '/contact', icon: EnvelopeIcon },
     { name: 'About', href: '/about', icon: InformationCircleIcon },
+    { name: 'FAQ', href: '/faq', icon: InformationCircleIcon },
+    { name: 'Privacy Policy', href: '/privacy-policy', icon: InformationCircleIcon },
+    { name: 'Terms and Conditions', href: '/terms-and-conditions', icon: InformationCircleIcon },
   ];
 
   return (

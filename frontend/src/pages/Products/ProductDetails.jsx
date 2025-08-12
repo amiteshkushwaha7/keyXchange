@@ -2,7 +2,8 @@ import { useLocation } from 'react-router-dom';
 import OrderButton from '../Order/OrderButton';
 import { useState } from 'react';
 import { FaExchangeAlt, FaShippingFast } from 'react-icons/fa';
-import SimilarProducts from './SimilarProducts'; // Add this import
+import SimilarProducts from './SimilarProducts'; 
+import HowToBuy from './HowToBuy'; 
 
 const TABS = [
   { key: 'details', label: 'Details' },
@@ -25,7 +26,13 @@ const ProductDetails = () => {
       case 'details':
         return (
           <div className="text-gray-700 leading-relaxed">
-            {product.details && product.details ? product.details : "Not specified by seller."}
+            {product.details && product.details.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-2">
+                {product.details.map((step, i) => (
+                  <li key={i}>{step}</li>
+                ))}
+              </ul>
+            ) : "Not specified by seller."}
           </div>
         );
       case 'howToRedeem':
@@ -57,7 +64,7 @@ const ProductDetails = () => {
     }
   };
 
-  return (
+  return ( 
     <div className="bg-gray-50 min-h-screen py-8 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Product Section */}
@@ -167,6 +174,8 @@ const ProductDetails = () => {
 
         {/* Similar Products Section */}
         <SimilarProducts productId={product._id} />
+
+        <HowToBuy product={product} />
       </div>
     </div>
   );

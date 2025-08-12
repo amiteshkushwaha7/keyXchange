@@ -11,7 +11,7 @@ const createOrderThunk = (name, apiCall) => createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data || { message: err.message });
     } 
-  }
+  } 
 );
 
 // Create all thunks using the helper
@@ -25,7 +25,7 @@ const initialState = {
   loading: false,
   error: null,
   message: null
-};
+}; 
 
 const orderSlice = createSlice({
   name: 'orders',
@@ -58,7 +58,7 @@ const orderSlice = createSlice({
         });
     };
 
-    // Place Order
+    // create Order
     addCommonCases(createOrder);
     builder.addCase(createOrder.fulfilled, (state, action) => {
       state.loading = false;
@@ -66,6 +66,17 @@ const orderSlice = createSlice({
         ? action.payload
         : action.payload.data || [];
       state.message = action.payload.message || 'Order placed successfully';
+    });
+
+    // delete order
+    addCommonCases(deleteOrder);
+    builder.addCase(deleteOrder.fulfilled, (state, action) => {
+      state.loading = false;
+      // if (state.currentOrder?._id === action.payload.orderId) {
+      //   state.currentOrder = null;
+      // }
+      // state.orders = state.orders.filter(order => order._id !== action.payload.orderId);
+      state.message = action.payload.message || 'Order deleted successfully';
     });
 
     // Get My Orders

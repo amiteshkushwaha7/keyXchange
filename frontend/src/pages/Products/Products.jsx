@@ -41,7 +41,7 @@ const Products = () => {
             <div className="flex items-center gap-3">
               <div className="inline-flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gray-100 border border-gray-200 p-1.5">
                 <img
-                  src={'../../../public/company/giva.jpeg'} 
+                  src={'/company/giva.jpeg'} 
                   alt={product.company || 'Company logo'}
                   className="h-full w-full rounded-full object-cover"
                   loading="lazy"

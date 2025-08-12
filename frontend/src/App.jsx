@@ -6,9 +6,17 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { loadUser } from './features/auth/authSlice';
 
 import Navbar from './components/layouts/Navbar';
+import Category from './components/layouts/Category';
+import Company from './components/layouts/Category';
+import Footer from './components/layouts/Footer';
+import Contact from './pages/Contact/Contact';
+import About from './pages/About/About';
+import PrivacyPolicy from './pages/Privacy Policy/Privacy';
+import Terms from './pages/T&C/T&C';
+import FAQ from './pages/FAQ/FAQ';
 // import NavigationBar from './components/layouts/NavigationBar';
 // import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/Login/Login'; 
+import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
@@ -41,7 +49,7 @@ import Users from './pages/Admin/Users';
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
   // Load user on app mount
@@ -122,6 +130,12 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-and-conditions" element={<Terms />} />
+        <Route path="/faq" element={<FAQ />} />
+
         <Route path="/products/:id" element={<ProductDetails />} />
 
         {/* User routes */}
@@ -155,6 +169,10 @@ function App() {
         {/* Catch all */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+
+      <Category />
+      <Company />
+      <Footer />
     </>
   );
 }

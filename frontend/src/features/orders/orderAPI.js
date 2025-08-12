@@ -1,6 +1,6 @@
 import api from '../../utils/apiClient';
 
-const orderAPI = {
+const orderAPI = { 
   createOrderAPI: async (data) => {
     const res = await api.post('/orders/create', data);
     return res.data;

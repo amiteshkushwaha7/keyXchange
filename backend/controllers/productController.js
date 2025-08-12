@@ -57,7 +57,7 @@ const productController = {
             message: 'Product created successfully',
             data: product
         }).send(res);
-    }),
+    }), 
 
     getAllProducts: catchAsync(async (req, res) => {
 
