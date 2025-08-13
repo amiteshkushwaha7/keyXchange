@@ -1,12 +1,24 @@
 {
-    "rewrites": [
-        {
-            "source": "/api/v1/(.*)",
-            "destination": "https://keyxchange-backend.vercel.app/api/v1/$1"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-    ]
+  "version": 2,
+  "name": "front-end",
+  "public": true,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/.*",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_API_URL": "https://your-backend-app-name.vercel.app/api/v1",
+    "VITE_RAZORPAY_KEY_ID": "rzp_test_VOJCTGNv2vCLaI"
+  }
 }
