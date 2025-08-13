@@ -1,7 +1,5 @@
 {
   "version": 2,
-  "name": "front-end",
-  "public": true,
   "builds": [
     {
       "src": "package.json",
@@ -13,12 +11,20 @@
   ],
   "routes": [
     {
+      "src": "/_next/static/(.*)",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/(.*\.js)",
+      "headers": {
+        "content-type": "application/javascript"
+      }
+    },
+    {
       "src": "/.*",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "VITE_API_URL": "https://keyxchange-backend.vercel.app/",
-    "VITE_RAZORPAY_KEY_ID": "rzp_test_VOJCTGNv2vCLaI"
-  }
+  ]
 }
