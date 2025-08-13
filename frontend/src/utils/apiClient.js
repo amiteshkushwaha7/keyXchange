@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_LOCAL_HOST_URL || import.meta.env.VITE_VERCEL_SERVER_URL,
+  baseURL: import.meta.env.VITE_LOCAL_HOST_BACKEND_URL || import.meta.env.VITE_VERCEL_BACKEND_URL,
   headers: {
     'Accept': 'application/json',
   },
@@ -10,7 +10,7 @@ const api = axios.create({
 
 export default api;
 
-
+ 
 
 
 
