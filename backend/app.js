@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(methodOverride('_method'));
 
-app.get('/', (req, res) => res.send('API Running...'));
+app.get('/', (req, res) => res.send('API Running...')); 
 
 app.use('/api/v1/auth', authRouter);
 
