@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/(.*)",
-            "destination": "https://keyxchange-backend.vercel.app/:path*"
+            "destination": "/"
         }
     ]
 }
