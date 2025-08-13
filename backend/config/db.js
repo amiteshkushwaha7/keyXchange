@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 dotenv.config();
 const MONGO_URI = process.env.MONGO_URI;
-const DATABASE_NAME = process.env.DATABASE_NAME;
+const DATABASE_NAME = process.env.DATABASE_NAME; 
 
 const connectDB = async () => {
     try {
