@@ -1,8 +1,12 @@
 {
     "rewrites": [
         {
+            "source": "/api/v1/(.*)",
+            "destination": "https://keyxchange-backend.vercel.app/api/v1/$1"
+        },
+        {
             "source": "/(.*)",
-            "destination": "/"
+            "destination": "/index.html"
         }
     ]
 }
