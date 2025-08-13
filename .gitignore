@@ -7,6 +7,3 @@ backend/node_modules/
 # Environment variable files
 frontend/.env
 backend/.env  
-
-frontend/vercel.json
-backend/vercel.json
