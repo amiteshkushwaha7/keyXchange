@@ -14,7 +14,7 @@
     }
   ],
   "env": {
-    "CLIENT_URL": "https://your-frontend-app-name.vercel.app",
+    "CLIENT_URL": "https://keyxchange.vercel.app",
     "PORT": "5000",
     "NODE_ENV": "production",
     "MONGO_URI": "mongodb+srv://amiteshkushwaha:mCYfDvKsMs87uu38@firstcluster.yqtxr9l.mongodb.net",
