@@ -28,14 +28,14 @@ const SimilarProducts = ({ productId }) => {
         navigate(`/products/${product._id}`, {
             state: { product }
         });
-    };
+    }; 
 
     // Filter similar products by company
     const similarByCompany = similarProducts.data?.ProductsByCompany || [];
     const similarByCategory = similarProducts.data?.ProductsByCategory || [];
 
-    // console.log(similarByCategory);
-    // console.log(similarByCompany);
+    console.log(similarByCategory);
+    console.log(similarByCompany);
 
     return (
         <div className="mt-12 space-y-8">

@@ -267,47 +267,105 @@ const productController = {
 
     // GET Similar Product
     getSimilarProducts: catchAsync(async (req, res) => {
-        const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id);
 
-        if (!product) {
-            throw new ApiError(404, 'Product not found');
-        }
+    if (!product) {
+        throw new ApiError(404, 'Product not found');
+    }
 
-        // Get 7 products from same company (excluding current product)
-        const similarByCompany = await Product.find({
+    // Debug: Log the product details
+    console.log('Base product details:', {
+        id: product._id,
+        company: product.company,
+        category: product.category,
+        isActive: product.isActive,
+        useLimit: product.useLimit,
+        isSold: product.isSold
+    });
+
+    // Helper function to get fallback products
+    const getFallbackProducts = async () => {
+        return await Product.find({
+            _id: { $ne: product._id },
+            isActive: true,
+            useLimit: { $gt: 0 },
+            isSold: false
+        })
+        .sort({ createdAt: -1 })
+        .limit(7);
+    };
+
+    // Get similar by company (with fallback)
+    let similarByCompany = await Product.find({
+        company: product.company,
+        _id: { $ne: product._id },
+        isActive: true,
+        useLimit: { $gt: 0 },
+        isSold: false
+    })
+    .sort({ createdAt: -1 })
+    .limit(7);
+
+    // If empty, try without useLimit filter
+    if (similarByCompany.length === 0) {
+        similarByCompany = await Product.find({
             company: product.company,
             _id: { $ne: product._id },
-            isActive: true, 
-            useLimit: { $gt: 0 },
+            isActive: true,
             isSold: false
         })
         .sort({ createdAt: -1 })
         .limit(7);
+    }
 
-        console.log('company', similarByCompany);
+    // If still empty, get fallback products
+    if (similarByCompany.length === 0) {
+        similarByCompany = await getFallbackProducts();
+        console.log('Using fallback for company similar products');
+    }
 
-        const similarByCategory = await Product.find({
+    // Get similar by category (with fallback)
+    let similarByCategory = await Product.find({
+        category: product.category,
+        _id: { $ne: product._id },
+        isActive: true,
+        useLimit: { $gt: 0 },
+        isSold: false
+    })
+    .sort({ createdAt: -1 })
+    .limit(7);
+
+    // If empty, try without useLimit filter
+    if (similarByCategory.length === 0) {
+        similarByCategory = await Product.find({
             category: product.category,
             _id: { $ne: product._id },
-            // company: { $ne: product.company } 
-            isActive: true, 
-            useLimit: { $gt: 0 },
+            isActive: true,
             isSold: false
         })
         .sort({ createdAt: -1 })
         .limit(7);
+    }
 
-        console.log('category', similarByCategory);
+    // If still empty, get fallback products
+    if (similarByCategory.length === 0) {
+        similarByCategory = await getFallbackProducts();
+        console.log('Using fallback for category similar products');
+    }
 
-        new ApiResponse({
-            statusCode: 200,
-            message: 'Similar products fetched successfully',
-            data: {
-                ProductsByCompany: similarByCompany,
-                ProductsByCategory: similarByCategory
-            }
-        }).send(res);
-    })
+    // Debug: Log results
+    console.log('Similar by company:', similarByCompany.length);
+    console.log('Similar by category:', similarByCategory.length);
+
+    new ApiResponse({
+        statusCode: 200,
+        message: 'Similar products fetched successfully',
+        data: {
+            ProductsByCompany: similarByCompany,
+            ProductsByCategory: similarByCategory
+        }
+    }).send(res);
+})
 };
 
 export default productController; 
