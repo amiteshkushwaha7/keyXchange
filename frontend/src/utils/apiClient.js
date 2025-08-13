@@ -1,61 +1,12 @@
 import axios from 'axios';
-// import store from '../app/store';
-// import { logoutUser } from '../features/auth/authSlice'; // Only logout needed now
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_LOCAL_HOST_URL || import.meta.env.VITE_VERCEL_SERVER_URL,
   headers: {
     'Accept': 'application/json',
   },
-  withCredentials: true, // Ensure cookies are sent with requests
+  withCredentials: true,
 });
-
-// 🚫 NO need for request interceptor for Authorization header
-// 🚫 NO need to read accessToken from Redux store
-
-// let isRefreshing = false;
-
-// api.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalRequest = error.config;
-
-//     // Skip refresh for login, refresh, or already retried
-//     if (
-//       originalRequest.url.includes('/auth/refresh') ||
-//       originalRequest.url.includes('/auth/login') ||
-//       error.response?.status !== 401 ||
-//       originalRequest._retry ||
-//       isRefreshing
-//     ) {
-//       return Promise.reject(error);
-//     }
-
-//     isRefreshing = true;
-//     originalRequest._retry = true;
-
-//     try {
-//       // Call refresh endpoint to renew access token via cookie
-//       await axios.get(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
-//         withCredentials: true,
-//       });
-
-//       // Retry the original request
-//       return api(originalRequest);
-//     } catch (refreshError) {
-//       // Clear state and redirect on failure
-//       store.dispatch(logoutUser());
-
-//       if (window.location.pathname !== '/login') {
-//         window.location.href = '/login';
-//       }
-
-//       return Promise.reject(refreshError);
-//     } finally {
-//       isRefreshing = false;
-//     }
-//   }
-// );
 
 export default api;
 

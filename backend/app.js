@@ -15,8 +15,19 @@ import customerRoutes from './routes/customerRoutes.js';
 dotenv.config();
 const app = express(); 
 
+const allowedOrigins = [
+  process.env.LOCAL_HOST_CLIENT_URL,
+  process.env.VERCEL_CLIENT_URL,
+];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: (origin, callback) => { 
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
     credentials: true
 }));
 
