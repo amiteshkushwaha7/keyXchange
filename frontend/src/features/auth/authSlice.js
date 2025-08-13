@@ -12,7 +12,7 @@ const createAuthThunk = (name, apiCall) => createAsyncThunk(
       return rejectWithValue(err.response?.data || { message: err.message });
     }
   }
-); 
+);
 
 export const registerUser = createAuthThunk('register', authAPI.registerAPI);
 export const loginUser = createAuthThunk('login', authAPI.loginAPI);
@@ -42,14 +42,14 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    clearMessage: (state) => { 
+    clearMessage: (state) => {
       state.message = null;
     },
     setAccessToken: (state, action) => {
       // state.accessToken = action.payload.accessToken;
       state.isAuthenticated = true;
       state.user = action.payload.user;
-      state.isAuthenticated = true; 
+      state.isAuthenticated = true;
       state.message = action.payload.message;
     },
     clearAuthState: (state) => {
@@ -82,7 +82,7 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.isAuthenticated = true;
       state.message = action.payload.message;
-    }); 
+    });
 
     // Login
     addCommonCases(loginUser);
@@ -92,7 +92,7 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.isAuthenticated = true;
       state.message = action.payload.message;
-    }); 
+    });
 
     // Logout
     addCommonCases(logoutUser);
@@ -103,16 +103,29 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.message = 'Logged out successfully';
     });
- 
+
     // Load User
-    addCommonCases(loadUser);
+    // addCommonCases(loadUser);
+    // builder.addCase(loadUser.fulfilled, (state, action) => {
+    //   state.loading = false;
+    //   state.user = action.payload.user;
+    //   // state.accessToken = action.payload.accessToken;
+    //   state.isAuthenticated = true;
+    //   state.message = action.payload.message;
+    // });
+
     builder.addCase(loadUser.fulfilled, (state, action) => {
       state.loading = false;
-      state.user = action.payload.user;
-      // state.accessToken = action.payload.accessToken;
-      state.isAuthenticated = true;
-      state.message = action.payload.message;
+      if (action.payload?.user) {
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+      } else {
+        state.user = null;
+        state.isAuthenticated = false;
+      }
+      state.message = action.payload?.message || null;
     });
+
 
     // Refresh User
     addCommonCases(refreshUser);
@@ -141,7 +154,7 @@ const authSlice = createSlice({
     addCommonCases(resetPassword);
     builder.addCase(resetPassword.fulfilled, (state, action) => {
       state.loading = false;
-      state.message = action.payload.message; 
+      state.message = action.payload.message;
     });
 
     // Update Profile

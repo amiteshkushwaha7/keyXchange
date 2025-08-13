@@ -11,7 +11,7 @@ const authAPI = {
     const res = await api.post('/auth/login', credentials);
     return res.data;
   },
-
+ 
   logoutAPI: async () => {
     const res = await api.post('/auth/logout');
     return res.data;
