@@ -105,15 +105,6 @@ const authSlice = createSlice({
     });
 
     // Load User
-    // addCommonCases(loadUser);
-    // builder.addCase(loadUser.fulfilled, (state, action) => {
-    //   state.loading = false;
-    //   state.user = action.payload.user;
-    //   // state.accessToken = action.payload.accessToken;
-    //   state.isAuthenticated = true;
-    //   state.message = action.payload.message;
-    // });
-
     builder.addCase(loadUser.fulfilled, (state, action) => {
       state.loading = false;
       if (action.payload?.user) {
