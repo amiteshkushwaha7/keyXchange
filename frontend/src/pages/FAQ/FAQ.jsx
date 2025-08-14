@@ -44,10 +44,8 @@ const FAQPage = () => {
 
   return (
     <>
-     
-        <title>FAQ | Digital Goods Marketplace</title>
-        <meta name="description" content="Frequently asked questions" />
-    
+      <title>FAQ | Digital Goods Marketplace</title>
+      <meta name="description" content="Frequently asked questions" />
 
       <div className="bg-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">

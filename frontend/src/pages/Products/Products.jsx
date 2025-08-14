@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getAllProducts } from '../../features/admin/adminSlice';
-import { BookmarkIcon } from '@heroicons/react/24/outline';
+import { FaStar, FaRegStar, FaBookmark } from 'react-icons/fa';
 import HowItWorks from '../../components/layouts/HowItWorks';
 
 const Products = () => {
@@ -22,85 +23,119 @@ const Products = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const now = new Date();
-    const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return '1 day ago';
-    if (diffInDays < 30) return `${diffInDays} days ago`;
-
-    const diffInMonths = Math.floor(diffInDays / 30);
-    if (diffInMonths === 1) return '1 month ago';
-    return `${diffInMonths} months ago`;
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    }).replace(/,/g, '');
   };
 
   const ProductCard = ({ product, handleDetailsClick }) => {
     return (
-      <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 flex flex-col h-full">
-        <div className="flex flex-col gap-4 sm:gap-6 flex-grow">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-3">
-              <div className="inline-flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gray-100 border border-gray-200 p-1.5">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col h-full hover:shadow-lg transition-shadow duration-300"
+      >
+        {/* Product Image */}
+        <div className="relative w-full h-48 bg-gray-50 flex items-center justify-center p-4">
+          <img
+            src={product.images?.[0]?.url || '/placeholder-product.png'}
+            alt={product.title}
+            className="object-contain w-full h-full"
+          />
+        </div>
+
+        {/* Product Content */}
+        <div className="p-5 flex flex-col flex-grow">
+          {/* Company Info */}
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-gray-100 border border-gray-200 overflow-hidden">
                 <img
-                  src={'/company/giva.jpeg'} 
+                  src={'/company/giva.jpeg'}
                   alt={product.company || 'Company logo'}
-                  className="h-full w-full rounded-full object-cover"
-                  loading="lazy"
+                  className="h-full w-full object-cover"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '../../../public/company/apple.png';
+                    e.target.src = '/placeholder-company.png';
                   }}
                 />
               </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">{product.company || 'Amazon'}</span>
-                <p className="text-gray-500 text-xs">{formatDate(product.createdAt)}</p>
-              </div>
+              <span className="text-sm font-medium text-gray-700">
+                {product.company || 'Unknown'}
+              </span>
             </div>
             <button
-              className="text-gray-400 hover:text-gray-700 p-1 rounded-full transition-colors duration-200"
+              className="text-gray-400 hover:text-purple-600 p-1 rounded-full transition-colors duration-200"
               aria-label="Save product"
             >
-              <BookmarkIcon className="h-5 w-5" />
+              <FaBookmark className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 line-clamp-2">
+          {/* Product Info */}
+          <div className="mb-4 flex-grow">
+            <h3 className="text-lg font-bold text-gray-900 line-clamp-2 mb-1">
               {product.title}
             </h3>
             {product.subtitle && (
-              <h4 className="text-sm sm:text-base text-gray-600 line-clamp-2">
+              <h4 className="text-sm text-gray-600 line-clamp-2 mb-3">
                 {product.subtitle}
               </h4>
             )}
 
-            <div className="flex flex-wrap gap-2 mt-2">
-              {product.category && (
-                <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
-                  {product.category}
+            {/* Rating */}
+            {product.rating && (
+              <div className="flex items-center mb-3">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    i < Math.floor(product.rating) ? 
+                      <FaStar key={i} className="text-yellow-400 text-xs" /> : 
+                      <FaRegStar key={i} className="text-yellow-400 text-xs" />
+                  ))}
+                </div>
+                <span className="text-gray-700 text-xs ml-1">
+                  {product.rating.toFixed(1)}
                 </span>
-              )}
-              <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
-                {product.isOneTimeUse ? 'One-Time-Use' : 'Reusable'}
-              </span>
+              </div>
+            )}
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {[
+                product.category,
+                product.isOneTimeUse ? "One Time Use" : "Multiuse",
+                `Expires: ${formatDate(product.expiryDate)}`
+              ].filter(Boolean).map((tag, i) => (
+                <span 
+                  key={i}
+                  className="bg-gray-100 px-2 py-1 rounded-full text-xs font-semibold text-gray-700"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
-        </div>
 
-        <div className="flex justify-between items-center pt-4 sm:pt-6 sm:mt-6 border-t border-gray-200">
-          <div className="text-lg sm:text-xl font-bold text-gray-900">
-            ₹{product.price?.toLocaleString() || '0'}
+          {/* Price and CTA */}
+          <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+            <div className="text-xl font-bold text-purple-700">
+              ₹{product.price?.toLocaleString() || '0'}
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleDetailsClick(product)}
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors duration-200"
+              aria-label={`View details for ${product.title}`}
+            >
+              View Details
+            </motion.button>
           </div>
-          <button
-            onClick={() => handleDetailsClick(product)}
-            className="bg-gray-900 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-sm sm:text-base hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-            aria-label={`View details for ${product.title}`}
-          >
-            Details
-          </button>
         </div>
-      </div>
+      </motion.div>
     );
   };
 
@@ -110,26 +145,31 @@ const Products = () => {
   );
 
   return (
-    <div className="bg-gray-100 min-h-screen p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="space-y-4">
+    <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen py-8 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="space-y-8">
           {isLoading ? (
-            <p>Loading...</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {activeProducts.map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  handleDetailsClick={handleDetailsClick}
-                />
-              ))}
+            <div className="flex justify-center items-center min-h-[300px]">
+              <p className="text-gray-600">Loading products...</p>
             </div>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold text-gray-900 mb-6">Available Products</h1>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {activeProducts.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    handleDetailsClick={handleDetailsClick}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
-      </div>
 
-      <HowItWorks />
+        <HowItWorks />
+      </div>
     </div>
   );
 };
