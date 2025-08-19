@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronDown, FiMail } from 'react-icons/fi';
 
@@ -62,12 +63,12 @@ const FAQPage = () => {
             </h1>
             <p className="mt-4 text-lg text-gray-600">
               Can't find what you're looking for?{' '}
-              <a 
-                href="/contact" 
+              <Link
+                to="/contact" 
                 className="text-purple-600 hover:text-purple-800 font-medium hover:underline transition"
               >
                 Contact our team
-              </a>
+              </Link>
             </p>
           </motion.div>
 
@@ -121,12 +122,12 @@ const FAQPage = () => {
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Still have questions?</h3>
             <p className="text-gray-600 mb-4">Our support team is happy to help!</p>
-            <a
-              href="/contact"
+            <Link
+              to="/contact"
               className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-purple-800 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:from-purple-700 hover:to-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all"
             >
               Contact Support
-            </a>
+            </Link>
           </motion.div>
         </div>
       </div>

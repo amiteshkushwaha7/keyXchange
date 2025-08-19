@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
+import { FaEnvelope, FaPhoneAlt, FaCommentAlt, FaMobileAlt } from 'react-icons/fa';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -47,166 +47,134 @@ const Contact = () => {
       <title>Contact Us | Digital Goods Marketplace</title>
       <meta name="description" content="Get in touch with our team" />
       
-      <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="bg-white min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-7xl mx-auto"
+          className="max-w-4xl mx-auto"
         >
           <div className="text-center mb-12">
             <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-              Contact Us
+              We're here to help you
             </h1>
             <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-              We'd love to hear from you! Reach out with questions or feedback.
+              Contact our support team for any questions or issues.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
-              {/* Contact Form */}
-              <div className="py-10 px-6 sm:p-12">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a message</h2>
-                
-                <AnimatePresence>
-                  {submitStatus === 'success' && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="mb-6 p-4 bg-green-50 text-green-700 rounded-lg"
-                    >
-                      Thank you! Your message has been sent successfully.
-                    </motion.div>
-                  )}
-                  
-                  {submitStatus === 'error' && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg"
-                    >
-                      Something went wrong. Please try again later.
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            {/* Warning Notice */}
+            <div className="bg-yellow-50 p-4 border-b border-yellow-200">
+              <div className="flex items-center">
+                <svg className="h-5 w-5 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <p className="text-sm text-yellow-700">
+                  Digital Goods Marketplace does not have an official customer support phone number. Please beware of fake numbers & spam calls!
+                </p>
+              </div>
+            </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Contact Options */}
+            <div className="flex justify-center">
+              {/* Web Support */}
+              <div className="p-6 sm:p-8">
+                <div className="flex items-center mb-4">
+                  <div className="bg-purple-100 p-3 rounded-full mr-4">
+                    <FaCommentAlt className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Web & Email Support</h2>
+                </div>
+                <p className="text-gray-600 mb-6">
+                  Contact us through our web form or email for general inquiries.
+                </p>
+                
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <AnimatePresence>
+                    {submitStatus === 'success' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="p-3 bg-green-50 text-green-700 rounded-lg text-sm"
+                      >
+                        Thank you! Your message has been sent successfully.
+                      </motion.div>
+                    )}
+                    
+                    {submitStatus === 'error' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="p-3 bg-red-50 text-red-700 rounded-lg text-sm"
+                      >
+                        Something went wrong. Please try again later.
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
-                    </label>
                     <input
                       type="text"
                       name="name"
-                      id="name"
+                      placeholder="Your Name"
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
-                    </label>
                     <input
                       type="email"
                       name="email"
-                      id="email"
+                      placeholder="Email Address"
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                      Message
-                    </label>
                     <textarea
-                      id="message"
                       name="message"
-                      rows={4}
+                      placeholder="Your Message"
+                      rows={3}
                       value={formData.message}
                       onChange={handleChange}
                       required
-                      className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     />
                   </div>
 
-                  <div>
-                    <motion.button
-                      type="submit"
-                      disabled={isSubmitting}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSubmitting ? 'Sending...' : 'Send Message'}
-                    </motion.button>
-                  </div>
+                  <motion.button
+                    type="submit"
+                    disabled={isSubmitting}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                  </motion.button>
                 </form>
               </div>
+            </div>
 
-              {/* Contact Info */}
-              <div className="bg-purple-50 py-10 px-6 sm:p-12">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Our information</h2>
-                
-                <div className="space-y-6">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 mt-1">
-                      <FaEnvelope className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm text-gray-600">Email us at</p>
-                      <p className="text-base font-medium text-gray-900">support@digitalgoods.example</p>
-                    </div>
+            {/* Additional Contact Info */}
+            <div className="border-t border-gray-200 p-6 sm:p-8">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Other ways to reach us</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center">
+                  <div className="bg-purple-100 p-2 rounded-full mr-3">
+                    <FaEnvelope className="h-5 w-5 text-purple-600" />
                   </div>
-
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 mt-1">
-                      <FaPhoneAlt className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm text-gray-600">Call us at</p>
-                      <p className="text-base font-medium text-gray-900">+1 (555) 123-4567</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 mt-1">
-                      <FaMapMarkerAlt className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm text-gray-600">Visit us at</p>
-                      <p className="text-base font-medium text-gray-900">123 Digital Street, Tech City, TC 10001</p>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-purple-100 pt-6 mt-6">
-                    <div className="flex items-center mb-4">
-                      <FaClock className="h-5 w-5 text-purple-600 mr-2" />
-                      <h3 className="text-sm font-medium text-gray-900">Business hours</h3>
-                    </div>
-                    <ul className="space-y-3">
-                      <li className="flex justify-between text-sm">
-                        <span className="text-gray-600">Monday - Friday</span>
-                        <span className="text-gray-900 font-medium">9:00 AM - 6:00 PM</span>
-                      </li>
-                      <li className="flex justify-between text-sm">
-                        <span className="text-gray-600">Saturday</span>
-                        <span className="text-gray-900 font-medium">10:00 AM - 4:00 PM</span>
-                      </li>
-                      <li className="flex justify-between text-sm">
-                        <span className="text-gray-600">Sunday</span>
-                        <span className="text-gray-900 font-medium">Closed</span>
-                      </li>
-                    </ul>
+                  <div>
+                    <p className="text-sm text-gray-500">Email us at</p>
+                    <p className="text-sm font-medium text-gray-900">amiteshkushwaha2020@gmail.com</p>
                   </div>
                 </div>
               </div>

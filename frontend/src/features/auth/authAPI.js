@@ -58,7 +58,7 @@ const authAPI = {
   getProfileAPI: async () => {
     const res = await api.get('/auth/profile');
     return res.data;
-  }
+  },
 };
 
 export default authAPI;
