@@ -6,6 +6,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { loadUser } from './features/auth/authSlice';
 
 import Navbar from './components/layouts/Navbar';
+import DevelopmentBanner from './components/layouts/DevelopmentBanner';
 // import NavigationBar from './components/layouts/NavigationBar';
 import Category from './components/layouts/Category';
 import Company from './components/layouts/Company';
@@ -64,6 +65,7 @@ function App() {
   return (
     <>
       <Navbar />
+      <DevelopmentBanner />
       {/* <NavigationBar/> */}
 
       <Routes>
