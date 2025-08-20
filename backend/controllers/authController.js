@@ -319,7 +319,7 @@ const authController = {
         user.passwordResetExpires = Date.now() + ms('10m');
         await user.save({ validateBeforeSave: false }); 
 
-        const resetURL = `${process.env.LOCAL_HOST_FRONTEND_URL}/reset-password/${resetToken}`;
+        const resetURL = `${process.env.VERCEL_FRONTEND_URL}/reset-password/${resetToken}`;
 
         const resetMailOptions = {
             from: process.env.SENDER_EMAIL,
@@ -377,7 +377,7 @@ const authController = {
         user.password = password;
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
-        await user.save();
+        await user.save({ validateBeforeSave: false });
 
         const confirmationMailOptions = {
             from: process.env.SENDER_EMAIL,
