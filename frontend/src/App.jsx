@@ -117,8 +117,8 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <Category />
-      <Company />
+      {/* <Category /> */}
+      {/* <Company /> */}
       <Footer />
     </>
   );

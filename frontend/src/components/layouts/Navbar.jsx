@@ -324,7 +324,7 @@ export default function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Get Started
-                      <FiLogIn className="ml-2 h-5 w-5" />
+                      <FiLogIn className="ml-2 h-5 w-5" /> 
                     </Link>
                   </motion.div>
                 )}
