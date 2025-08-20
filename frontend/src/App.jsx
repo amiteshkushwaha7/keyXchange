@@ -10,8 +10,8 @@ import DevelopmentBanner from './components/layouts/DevelopmentBanner';
 // import NavigationBar from './components/layouts/NavigationBar';
 import Category from './components/layouts/Category';
 import Company from './components/layouts/Company';
-import Footer from './components/layouts/Footer';
-import Contact from './pages/Contact/Contact';
+import Footer from './components/layouts/Footer'; 
+import Contact from './pages/Contact/Contact'; 
 import About from './pages/About/About';
 import PrivacyPolicy from './pages/Privacy Policy/Privacy';
 import Terms from './pages/T&C/T&C';
@@ -61,7 +61,7 @@ function App() {
   if (loading) {
     return <LoadingScreen />;
   }
-
+ 
   return (
     <>
       <Navbar />

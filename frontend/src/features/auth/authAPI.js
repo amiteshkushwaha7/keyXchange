@@ -1,5 +1,4 @@
 import api from '../../utils/apiClient';
-import { getProfile } from './authSlice';
 
 const authAPI = {
   registerAPI: async (data) => {
@@ -27,20 +26,19 @@ const authAPI = {
     return res.data;
   }, 
 
+  updatePasswordAPI: async (data) => {
+    const res = await api.patch('/auth/update-password', data);
+    return res.data; 
+  },
+  
   forgotPasswordAPI: async (email) => {
     const res = await api.post('/auth/forgot-password', { email });
     return res.data;
   },
 
-  updatePasswordAPI: async (data) => {
-    const res = await api.patch('/auth/update-password', data);
-    return res.data; 
-  }, 
-
-  resetPasswordAPI: async ({ token, password, confirmPassword }) => {
+  resetPasswordAPI: async ({ token, password }) => {
     const res = await api.post(`/auth/reset-password/${token}`, {
-      password,
-      confirmPassword
+      password
     });
     return res.data;
   },

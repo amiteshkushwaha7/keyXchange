@@ -20,8 +20,8 @@ export const logoutUser = createAuthThunk('logout', authAPI.logoutAPI);
 export const loadUser = createAuthThunk('loadUser', authAPI.loadUserAPI);
 export const refreshUser = createAuthThunk('refreshUser', authAPI.refreshAPI);
 export const forgotPassword = createAuthThunk('forgotPassword', authAPI.forgotPasswordAPI);
-export const updatePassword = createAuthThunk('updatePassword', authAPI.updatePasswordAPI);
 export const resetPassword = createAuthThunk('resetPassword', authAPI.resetPasswordAPI);
+export const updatePassword = createAuthThunk('updatePassword', authAPI.updatePasswordAPI);
 export const updateProfile = createAuthThunk('updateProfile', authAPI.updateProfileAPI);
 export const deleteAccount = createAuthThunk('deleteAccount', authAPI.deleteAccountAPI);
 export const getProfile = createAuthThunk('getProfile', authAPI.getProfileAPI);
@@ -131,7 +131,8 @@ const authSlice = createSlice({
     addCommonCases(forgotPassword);
     builder.addCase(forgotPassword.fulfilled, (state, action) => {
       state.loading = false;
-      state.message = action.payload.message;
+      // state.message = action.payload.message;
+      console.log(action.payload);
     });
 
     // Update Password
@@ -176,4 +177,4 @@ const authSlice = createSlice({
 });
 
 export const { clearError, clearMessage, setAccessToken, clearAuthState } = authSlice.actions;
-export default authSlice.reducer;
+export default authSlice.reducer; 

@@ -20,6 +20,7 @@ const ForgotPassword = () => {
   const onSubmit = (e) => {
     e.preventDefault();
     dispatch(forgotPassword(email));
+    navigate('/login');
   };
 
   return (
@@ -126,4 +127,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword;
+export default ForgotPassword; 

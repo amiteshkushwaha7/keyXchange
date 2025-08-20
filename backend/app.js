@@ -38,7 +38,7 @@ app.use(methodOverride('_method'));
 
 app.get('/', (req, res) => res.send('API Running...'));
 
-app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/auth', authRouter); 
 
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/admin/products', productRoutes);

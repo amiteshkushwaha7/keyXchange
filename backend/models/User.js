@@ -33,9 +33,17 @@ const userSchema = new mongoose.Schema({
     refreshToken: {
         type: String
     },
+
     // passwordChangedAt: Date,
-    // passwordResetToken: String,
-    // passwordResetExpires: Date,
+    
+    passwordResetToken: {
+        type: String,
+    },
+
+    passwordResetExpires: {
+        type: Date,
+    },
+
     active: {
         type: Boolean,
         default: true,
@@ -83,7 +91,7 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 //     const resetToken = crypto.randomBytes(32).toString('hex');
 
 //     this.passwordResetToken = crypto
-//         .createHash('sha256')
+//         .createHash('sha256') 
 //         .update(resetToken)
 //         .digest('hex');
 

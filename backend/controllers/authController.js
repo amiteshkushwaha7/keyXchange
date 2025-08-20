@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import User from '../models/User.js';
 import getTokens from '../config/jwt.js';
 import catchAsync from '../middlewares/catchAsync.js';
@@ -271,7 +272,7 @@ const authController = {
     updateProfile: catchAsync(async (req, res) => {
         const user = await User.findById(req.user._id);
 
-        if(!user) {
+        if (!user) {
             throw new ApiError(404, 'User not found');
         }
 
@@ -295,7 +296,117 @@ const authController = {
             statusCode: 200,
             message: "Account deleted successfully"
         }).send(res);
-    })
+    }),
+
+    forgotPassword: catchAsync(async (req, res) => {
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return new ApiResponse({
+                statusCode: 200,
+                message: "User does not exist with this email"
+            }).send(res);
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const hashedToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex');
+
+        // Set token and expiry (10 minutes)
+        user.passwordResetToken = hashedToken;
+        user.passwordResetExpires = Date.now() + ms('10m');
+        await user.save({ validateBeforeSave: false }); 
+
+        let frontendUrl;
+        if (process.env.NODE_ENV === 'production')
+            frontendUrl = process.env.VERCEL_FRONTEND_URL;
+        else 
+            frontendUrl = process.env.LOCAL_HOST_FRONTEND_URL;
+
+        // Create reset URL
+        const resetURL = `${frontendUrl}/reset-password/${resetToken}`;
+
+        // Send email
+        const resetMailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: user.email,
+            subject: 'Password Reset Request - KeyXchange',
+            html: `
+            <h2>Password Reset Request</h2>
+            <p>Hello ${user.name},</p>
+            <p>You requested to reset your password. Click the link below to proceed:</p>
+            <a href="${resetURL}" style="display: inline-block; padding: 10px 20px; background-color: #7C3AED; color: white; text-decoration: none; border-radius: 5px;">
+                Reset Password
+            </a>
+            <p>This link will expire in 10 minutes.</p>
+            <p>If you didn't request this, please ignore this email.</p>
+            <br>
+            <p>Best regards,<br>The KeyXchange Team</p>
+        `
+        };
+
+        try {
+            await sendEmail(resetMailOptions);
+
+            return new ApiResponse({
+                statusCode: 200,
+                message: `A password reset link has been sent to ${user.email}`
+            }).send(res);
+        } catch (error) {
+            // Reset the token if email fails
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            await user.save({ validateBeforeSave: false });
+
+            throw new ApiError(500, 'Error sending email. Please try again.');
+        }
+    }),
+
+    resetPassword: catchAsync(async (req, res) => {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        // Hash the token to compare with stored token
+        const hashedToken = crypto
+            .createHash('sha256')
+            .update(token)
+            .digest('hex');
+
+        // Find user with valid token
+        const user = await User.findOne({
+            passwordResetToken: hashedToken,
+            passwordResetExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            throw new ApiError(400, 'Invalid or expired reset token');
+        }
+
+        // Update password and clear reset token
+        user.password = password;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save();
+
+        // Send confirmation email
+        const confirmationMailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: user.email,
+            subject: 'Password Reset Successful - KeyXchange',
+            text: `Hello ${user.name},\n\nYour password has been successfully reset.\n\nIf you didn't make this change, please contact us immediately.\n\nBest regards,\nThe KeyXchange Team`
+        };
+
+        await sendEmail(confirmationMailOptions);
+
+        return new ApiResponse({
+            statusCode: 200,
+            message: "Password reset successfully"
+        }).send(res);
+    }),
 };
 
 export default authController;

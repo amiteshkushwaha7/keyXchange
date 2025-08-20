@@ -17,8 +17,11 @@ router.route('/logout')
 router.route('/update-password')
     .patch(authMiddleware.protect, validate.updatePasswordInput, authController.updatePassword);
 
-// router.post('/forgot-password', authController.forgotPassword);
-// router.patch('/reset-password/:token', authController.resetPassword);
+router.route('/forgot-password')
+    .post(authController.forgotPassword);
+
+router.route('/reset-password/:token')
+    .post(authController.resetPassword);
 
 router.route('/refresh')
     .get(authController.refreshToken);
