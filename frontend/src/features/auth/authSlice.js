@@ -131,20 +131,21 @@ const authSlice = createSlice({
     addCommonCases(forgotPassword);
     builder.addCase(forgotPassword.fulfilled, (state, action) => {
       state.loading = false;
-      // state.message = action.payload.message;
-      console.log(action.payload);
-    });
-
-    // Update Password
-    addCommonCases(updatePassword);
-    builder.addCase(updatePassword.fulfilled, (state, action) => {
-      state.loading = false;
-      state.message = action.payload.message;
+      state.message = action.payload?.message || 'Password reset link sent to your email';
+      // console.log('forgot', action.payload);
     });
 
     // Reset Password
     addCommonCases(resetPassword);
     builder.addCase(resetPassword.fulfilled, (state, action) => {
+      state.loading = false;
+      state.message = action.payload?.message || 'Password reset successful';
+      // console.log('reset', action.payload);
+    });
+
+    // Update Password
+    addCommonCases(updatePassword);
+    builder.addCase(updatePassword.fulfilled, (state, action) => {
       state.loading = false;
       state.message = action.payload.message;
     });

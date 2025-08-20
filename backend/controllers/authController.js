@@ -309,28 +309,18 @@ const authController = {
             }).send(res);
         }
 
-        // Generate reset token
         const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedToken = crypto
             .createHash('sha256')
             .update(resetToken)
             .digest('hex');
 
-        // Set token and expiry (10 minutes)
         user.passwordResetToken = hashedToken;
         user.passwordResetExpires = Date.now() + ms('10m');
         await user.save({ validateBeforeSave: false }); 
 
-        let frontendUrl;
-        if (process.env.NODE_ENV === 'production')
-            frontendUrl = process.env.VERCEL_FRONTEND_URL;
-        else 
-            frontendUrl = process.env.LOCAL_HOST_FRONTEND_URL;
+        const resetURL = `${process.env.LOCAL_HOST_FRONTEND_URL}/reset-password/${resetToken}`;
 
-        // Create reset URL
-        const resetURL = `${frontendUrl}/reset-password/${resetToken}`;
-
-        // Send email
         const resetMailOptions = {
             from: process.env.SENDER_EMAIL,
             to: user.email,
@@ -357,7 +347,6 @@ const authController = {
                 message: `A password reset link has been sent to ${user.email}`
             }).send(res);
         } catch (error) {
-            // Reset the token if email fails
             user.passwordResetToken = undefined;
             user.passwordResetExpires = undefined;
             await user.save({ validateBeforeSave: false });
@@ -370,7 +359,6 @@ const authController = {
         const { token } = req.params;
         const { password } = req.body;
 
-        // Hash the token to compare with stored token
         const hashedToken = crypto
             .createHash('sha256')
             .update(token)
@@ -386,13 +374,11 @@ const authController = {
             throw new ApiError(400, 'Invalid or expired reset token');
         }
 
-        // Update password and clear reset token
         user.password = password;
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
         await user.save();
 
-        // Send confirmation email
         const confirmationMailOptions = {
             from: process.env.SENDER_EMAIL,
             to: user.email,
