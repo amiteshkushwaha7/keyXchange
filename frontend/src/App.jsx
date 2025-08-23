@@ -7,6 +7,7 @@ import { loadUser } from './features/auth/authSlice';
 
 import Navbar from './components/layouts/Navbar';
 import DevelopmentBanner from './components/layouts/DevelopmentBanner';
+import BugReportComponent from './components/layouts/BugReportComponent';
 // import NavigationBar from './components/layouts/NavigationBar';
 import Category from './components/layouts/Category';
 import Company from './components/layouts/Company';
@@ -66,6 +67,7 @@ function App() {
     <>
       <Navbar />
       <DevelopmentBanner />
+      <BugReportComponent />
       {/* <NavigationBar/> */}
 
       <Routes>
@@ -92,7 +94,7 @@ function App() {
             <Route path="profile" element={<Profile />} />
             <Route path="my-orders" element={<Order />} />
           </Route>
-        </Route>
+        </Route> 
 
         {/* Admin routes */}
         <Route element={<AdminRoute />}>

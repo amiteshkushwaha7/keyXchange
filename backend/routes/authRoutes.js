@@ -22,7 +22,7 @@ router.route('/forgot-password')
 
 router.route('/reset-password/:token')
     .post(authController.resetPassword);
-
+ 
 router.route('/refresh')
     .get(authController.refreshToken);
 
