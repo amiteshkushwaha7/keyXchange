@@ -17,7 +17,7 @@ const DevelopmentBanner = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', damping: 20 }}
-          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:bottom-4 sm:max-w-md z-50"
+          className="fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:bottom-4 sm:max-w-md z-50"
         >
           <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-4 flex items-start justify-between">
