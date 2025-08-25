@@ -316,7 +316,7 @@ const authController = {
             .digest('hex');
 
         user.passwordResetToken = hashedToken;
-        user.passwordResetExpires = Date.now() + ms('10m');
+        user.passwordResetExpires = Date.now() + ms('10m'); 
         await user.save({ validateBeforeSave: false }); 
 
         const resetURL = `${process.env.VERCEL_FRONTEND_URL}/reset-password/${resetToken}`;

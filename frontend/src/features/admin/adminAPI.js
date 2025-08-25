@@ -5,7 +5,7 @@ const adminAPI = {
   getDashboardStatsAPI: async () => {
     const res = await api.get('/admin/dashboard');
     return res.data;
-  },
+  }, 
 
   // Products
   getAllProductsAPI: async (params = {}) => {

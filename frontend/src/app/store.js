@@ -3,6 +3,7 @@ import adminReducer from '../features/admin/adminSlice'
 import authReducer from '../features/auth/authSlice';
 import productReducer from '../features/products/productSlice';
 import orderReducer from '../features/orders/orderSlice';
+import contactReducer from '../features/contact/contactSlice';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     auth: authReducer,
     products: productReducer,
     orders: orderReducer, 
+    contact: contactReducer,
   },
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({

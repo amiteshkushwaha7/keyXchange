@@ -1,15 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaEnvelope, FaPhoneAlt, FaCommentAlt, FaMobileAlt } from 'react-icons/fa';
+import { FaEnvelope, FaPhoneAlt, FaCommentAlt, FaMobileAlt, FaQuestionCircle, FaCheckCircle } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import { submitContactForm, clearContactState, resetContactSuccess } from '../../features/contact/contactSlice';
 
 const Contact = () => {
+  const dispatch = useDispatch();
+  // ...existing code...
+  const loading = useSelector(state => state.contact.contactForm.loading);
+  const error = useSelector(state => state.contact.contactForm.error);
+  const success = useSelector(state => state.contact.contactForm.success);
+  const message = useSelector(state => state.contact.contactForm.message);
+  // ...existing code...
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    contactType: '',
+    message: '',
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null);
+
+  const [activeTab, setActiveTab] = useState('web');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearContactState());
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (success) {
+      setShowSuccessModal(true);
+      const timer = setTimeout(() => {
+        setShowSuccessModal(false);
+        dispatch(resetContactSuccess());
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [success, dispatch]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,38 +47,48 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      // Replace with your actual API endpoint
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+    dispatch(submitContactForm(formData));
 
-      if (response.ok) {
-        setSubmitStatus('success');
-        setFormData({ name: '', email: '', message: '' });
-      } else {
-        setSubmitStatus('error');
-      }
-    } catch (error) {
-      setSubmitStatus('error');
-    } finally {
-      setIsSubmitting(false);
-    }
+    setFormData({
+      name: '',
+      email: '',
+      contactType: '',
+      message: '',
+    });
   };
 
   return (
     <>
       <title>Contact Us | Digital Goods Marketplace</title>
       <meta name="description" content="Get in touch with our team" />
-      
+
       <div className="bg-white min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
-        <motion.div 
+        <AnimatePresence>
+          {showSuccessModal && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/10"
+            >
+              <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center max-w-sm mx-auto">
+                <FaCheckCircle className="text-green-500 text-4xl mb-2" />
+                <h2 className="text-lg font-bold mb-2">Message Sent!</h2>
+                <p className="text-gray-700 text-center mb-2">
+                  Thank you for contacting us. We'll get back to you soon.
+                </p>
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -77,91 +117,118 @@ const Contact = () => {
             </div>
 
             {/* Contact Options */}
-            <div className="flex justify-center">
-              {/* Web Support */}
-              <div className="p-6 sm:p-8">
-                <div className="flex items-center mb-4">
-                  <div className="bg-purple-100 p-3 rounded-full mr-4">
-                    <FaCommentAlt className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <h2 className="text-xl font-bold text-gray-900">Web & Email Support</h2>
-                </div>
-                <p className="text-gray-600 mb-6">
-                  Contact us through our web form or email for general inquiries.
-                </p>
-                
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <AnimatePresence>
-                    {submitStatus === 'success' && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="p-3 bg-green-50 text-green-700 rounded-lg text-sm"
-                      >
-                        Thank you! Your message has been sent successfully.
-                      </motion.div>
-                    )}
-                    
-                    {submitStatus === 'error' && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="p-3 bg-red-50 text-red-700 rounded-lg text-sm"
-                      >
-                        Something went wrong. Please try again later.
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <div>
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Your Name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    />
-                  </div>
-
-                  <div>
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="Email Address"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    />
-                  </div>
-
-                  <div>
-                    <textarea
-                      name="message"
-                      placeholder="Your Message"
-                      rows={3}
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                      className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    />
-                  </div>
-
-                  <motion.button
-                    type="submit"
-                    disabled={isSubmitting}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            <div className="p-6 sm:p-8">
+              <AnimatePresence mode="wait">
+                {activeTab === 'web' && (
+                  <motion.div
+                    key="web"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                  </motion.button>
-                </form>
-              </div>
+                    <div className="flex items-center mb-4">
+                      <div className="bg-purple-100 p-3 rounded-full mr-4">
+                        <FaCommentAlt className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <h2 className="text-xl font-bold text-gray-900">Web & Email Support</h2>
+                    </div>
+                    <p className="text-gray-600 mb-6">
+                      Contact us through our web form or email for general inquiries.
+                    </p>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <AnimatePresence>
+                        {error && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="p-3 bg-red-50 text-red-700 rounded-lg text-sm"
+                          >
+                            {error}
+                          </motion.div>
+                        )}
+
+                        {success && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="p-3 bg-green-50 text-green-700 rounded-lg text-sm"
+                          >
+                            {message || 'Thank you! Your message has been sent successfully.'}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <input
+                            type="text"
+                            name="name"
+                            placeholder="Your Name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                            className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          />
+                        </div>
+
+                        <div>
+                          <input
+                            type="email"
+                            name="email"
+                            placeholder="Email Address"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <select
+                          name="contactType"
+                          value={formData.contactType}
+                          onChange={handleChange}
+                          required
+                          className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        >
+                          <option value="general">General Inquiry</option>
+                          <option value="technical">Technical Support</option>
+                          <option value="billing">Billing Question</option>
+                          <option value="product">Product Information</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <textarea
+                          name="message"
+                          placeholder="Your Message"
+                          rows={4}
+                          value={formData.message}
+                          onChange={handleChange}
+                          required
+                          className="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
+                      </div>
+
+                      <motion.button
+                        type="submit"
+                        disabled={loading}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {loading ? 'Sending...' : 'Send Message'}
+                      </motion.button>
+                    </form>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Additional Contact Info */}
@@ -175,6 +242,16 @@ const Contact = () => {
                   <div>
                     <p className="text-sm text-gray-500">Email us at</p>
                     <p className="text-sm font-medium text-gray-900">amiteshkushwaha2020@gmail.com</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <div className="bg-gray-100 p-2 rounded-full mr-3">
+                    <FaQuestionCircle className="h-5 w-5 text-gray-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Help Center</p>
+                    <Link to="/faq" className="text-sm font-medium text-gray-900">FAQ & Knowledge Base</Link>
                   </div>
                 </div>
               </div>

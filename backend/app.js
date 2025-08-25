@@ -11,6 +11,7 @@ import orderRouter from './routes/orderRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import customerRoutes from './routes/customerRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -50,6 +51,8 @@ app.use('/api/v1/admin/customers', customerRoutes);
 
 app.use('/api/v1/orders', orderRouter);
 app.use('/api/v1/admin/orders', orderRouter);
+
+app.use('/api/v1/contact', contactRoutes);
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
 

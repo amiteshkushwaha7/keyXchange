@@ -181,7 +181,7 @@ const adminSlice = createSlice({
       state.customersLoading = false;
       state.customers = Array.isArray(action.payload)
         ? action.payload
-        : action.payload.data || [];
+        : action.payload.data || []; 
       state.message = action.payload.message;
     });
 
