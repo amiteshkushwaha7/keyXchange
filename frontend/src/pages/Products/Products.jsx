@@ -139,9 +139,12 @@ const Products = () => {
     );
   };
 
-  // Filter products to show only active/not sold products
+  // Filter products to show only active/not sold products and expiry date > today
   const activeProducts = products.filter(product => 
-    product.isActive && !product.isSold && product.usageLimit > 0
+    product.isActive &&
+    !product.isSold &&
+    product.usageLimit > 0 &&
+    new Date(product.expiryDate) > new Date()
   );
 
   return (

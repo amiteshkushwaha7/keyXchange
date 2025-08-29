@@ -36,7 +36,15 @@ const SimilarProducts = ({ productId }) => {
         });
     };
 
-    // Filter similar products by company
+    // Filter similar products by company and category with your conditions
+    const filterActiveProducts = (products) =>
+        products.filter(product =>
+            product.isActive &&
+            !product.isSold &&
+            product.usageLimit > 0 &&
+            new Date(product.expiryDate) > new Date()
+        );
+
     const similarByCompany = similarProducts.data?.ProductsByCompany || [];
     const similarByCategory = similarProducts.data?.ProductsByCategory || [];
 
