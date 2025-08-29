@@ -31,7 +31,6 @@ const Feedbacks = () => {
     const dispatch = useDispatch();
     const { contacts } = useSelector((state) => state.contact);
     const [selectedContact, setSelectedContact] = useState(null);
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
     const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -39,13 +38,14 @@ const Feedbacks = () => {
     const [actionMenuContact, setActionMenuContact] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [localContacts, setLocalContacts] = useState([]);
 
-    const [editForm, setEditForm] = useState({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-    });
+    // Sync local contacts with Redux state
+    useEffect(() => {
+        if (contacts.data && contacts.data.length > 0) {
+            setLocalContacts(contacts.data);
+        }
+    }, [contacts.data]);
 
     useEffect(() => {
         dispatch(getAllContacts());
@@ -55,31 +55,18 @@ const Feedbacks = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        if (contacts.success && (editDialogOpen || deleteDialogOpen || deleteAllDialogOpen)) {
-            setEditDialogOpen(false);
+        if (contacts.success && (deleteDialogOpen || deleteAllDialogOpen || viewDialogOpen)) {
             setDeleteDialogOpen(false);
             setDeleteAllDialogOpen(false);
             setViewDialogOpen(false);
             setSelectedContact(null);
             dispatch(resetContactsSuccess());
         }
-    }, [contacts.success, dispatch, editDialogOpen, deleteDialogOpen, deleteAllDialogOpen]);
+    }, [contacts.success, dispatch, deleteDialogOpen, deleteAllDialogOpen, viewDialogOpen]);
 
     const handleRefresh = () => {
         dispatch(clearContactsError());
         dispatch(getAllContacts());
-    };
-
-    const handleEdit = (contact) => {
-        setSelectedContact(contact);
-        setEditForm({
-            name: contact.name || '',
-            email: contact.email || '',
-            subject: contact.subject || '',
-            message: contact.message || ''
-        });
-        setEditDialogOpen(true);
-        setActionMenuAnchor(null);
     };
 
     const handleView = (contact) => {
@@ -96,21 +83,64 @@ const Feedbacks = () => {
 
     const handleDeleteConfirm = () => {
         if (selectedContact) {
-            dispatch(deleteContact(selectedContact.id));
+            setLocalContacts(prevContacts =>
+                prevContacts.filter(contact => contact._id !== selectedContact._id)
+            );
+
+            dispatch(deleteContact(selectedContact._id))
+                .unwrap()
+                .then(() => {
+                    dispatch(getAllContacts()); // <-- Fetch updated contacts after delete
+                })
+                .catch(error => {
+                    console.error('Delete failed:', error);
+                    setLocalContacts(contacts.data);
+                });
+
+            setDeleteDialogOpen(false);
+            setSelectedContact(null);
         }
     };
 
     const handleDeleteAllConfirm = () => {
-        dispatch(deleteAllContacts());
+        // Optimistic update - clear local state immediately
+        setLocalContacts([]);
+        
+        dispatch(deleteAllContacts())
+            .unwrap()
+            .catch(error => {
+                // Revert if the API call fails
+                console.error('Delete all failed:', error);
+                setLocalContacts(contacts.data); // Revert to original state
+            });
+        
+        setDeleteAllDialogOpen(false);
     };
 
-    const handleEditSubmit = (e) => {
-        e.preventDefault();
+    const handleUpdateContact = () => {
         if (selectedContact) {
-            dispatch(updateContact({
-                id: selectedContact.id,
-                data: editForm
-            }));
+            const updatedStatus = !selectedContact.isResolved;
+            
+            // Optimistic update - update local state immediately
+            setLocalContacts(prevContacts => 
+                prevContacts.map(contact => 
+                    contact._id === selectedContact._id 
+                        ? { ...contact, isResolved: updatedStatus }
+                        : contact
+                )
+            );
+            
+            // Update the contact in the view dialog
+            setSelectedContact({ ...selectedContact, isResolved: updatedStatus });
+            
+            dispatch(updateContact(selectedContact._id))
+                .unwrap()
+                .catch(error => {
+                    // Revert if the API call fails
+                    console.error('Update failed:', error);
+                    setLocalContacts(contacts.data); // Revert to original state
+                    setSelectedContact(contacts.data.find(c => c._id === selectedContact._id));
+                });
         }
     };
 
@@ -138,20 +168,19 @@ const Feedbacks = () => {
     };
 
     // Filter contacts based on search term and status
-    const filteredContacts = contacts.data.filter(contact => {
-        const matchesSearch = 
+    const filteredContacts = localContacts.filter(contact => {
+        const matchesSearch =
             contact.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             contact.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             contact.subject?.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesStatus = statusFilter === 'all' || 
-                            (statusFilter === 'resolved' && contact.status === 'resolved') ||
-                            (statusFilter === 'pending' && (!contact.status || contact.status === 'pending'));
-        
+
+        const matchesStatus = statusFilter === 'all' ||
+            (statusFilter === 'resolved' && contact.isResolved) ||
+            (statusFilter === 'pending' && (!contact.isResolved));
         return matchesSearch && matchesStatus;
     });
 
-    if (contacts.loading && contacts.data.length === 0) {
+    if (contacts.loading && localContacts.length === 0) {
         return (
             <div className="flex justify-center items-center min-h-screen">
                 <div className="text-center">
@@ -183,7 +212,7 @@ const Feedbacks = () => {
                             </button>
                             <button
                                 onClick={() => setDeleteAllDialogOpen(true)}
-                                disabled={contacts.data.length === 0 || contacts.loading}
+                                disabled={localContacts.length === 0 || contacts.loading}
                                 className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <TrashIcon className="h-5 w-5" />
@@ -199,20 +228,20 @@ const Feedbacks = () => {
                         <div className="flex items-center justify-between">
                             <div className="overflow-hidden">
                                 <p className="text-sm opacity-80 truncate">TOTAL CONTACTS</p>
-                                <h3 className="text-xl md:text-2xl font-bold mt-1 truncate">{contacts.data.length}</h3>
+                                <h3 className="text-xl md:text-2xl font-bold mt-1 truncate">{localContacts.length}</h3>
                             </div>
-                            <div className="p-2 md:p-3 bg-white bg-opacity-20 rounded-lg">
+                            <div className="p-2 md:p-3 bg-purple-700 bg-opacity-20 rounded-lg">
                                 <EnvelopeIcon className="h-5 md:h-6 w-5 md:w-6" />
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-200">
                         <div className="flex items-center justify-between">
                             <div className="overflow-hidden">
                                 <p className="text-sm text-gray-500 truncate">RESOLVED</p>
                                 <h3 className="text-xl md:text-2xl font-bold text-gray-800 mt-1 truncate">
-                                    {contacts.data.filter(c => c.status === 'resolved').length}
+                                    {localContacts.filter(c => c.isResolved === true).length}
                                 </h3>
                             </div>
                             <div className="p-2 md:p-3 bg-green-100 rounded-lg">
@@ -220,13 +249,13 @@ const Feedbacks = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-200">
                         <div className="flex items-center justify-between">
                             <div className="overflow-hidden">
                                 <p className="text-sm text-gray-500 truncate">PENDING</p>
                                 <h3 className="text-xl md:text-2xl font-bold text-gray-800 mt-1 truncate">
-                                    {contacts.data.filter(c => !c.status || c.status === 'pending').length}
+                                    {localContacts.filter(c => !c.isResolved).length}
                                 </h3>
                             </div>
                             <div className="p-2 md:p-3 bg-yellow-100 rounded-lg">
@@ -234,16 +263,16 @@ const Feedbacks = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-200">
                         <div className="flex items-center justify-between">
                             <div className="overflow-hidden">
                                 <p className="text-sm text-gray-500 truncate">NEW TODAY</p>
                                 <h3 className="text-xl md:text-2xl font-bold text-gray-800 mt-1 truncate">
-                                    {contacts.data.filter(c => {
+                                    {localContacts.filter(c => {
                                         const today = new Date();
                                         const contactDate = new Date(c.createdAt);
-                                        return contactDate.setHours(0,0,0,0) === today.setHours(0,0,0,0);
+                                        return contactDate.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0);
                                     }).length}
                                 </h3>
                             </div>
@@ -256,26 +285,32 @@ const Feedbacks = () => {
 
                 {/* Search and Filter */}
                 <div className="mb-6 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        {/* Search Input */}
                         <div className="relative flex-1 min-w-0">
+                            <label htmlFor="search-contacts" className="sr-only">Search contacts</label>
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
                             </div>
                             <input
+                                id="search-contacts"
                                 type="text"
                                 className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                                placeholder="Search contacts..."
+                                placeholder="Search by name, email, or subject..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                autoComplete="off"
                             />
                         </div>
-                        
-                        <div className="flex items-center gap-2">
+                        {/* Status Filter */}
+                        <div className="flex items-center gap-2 md:w-56">
+                            <label htmlFor="status-filter" className="sr-only">Filter by status</label>
                             <FunnelIcon className="h-5 w-5 text-gray-500 flex-shrink-0" />
-                            <select 
+                            <select
+                                id="status-filter"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 w-full md:w-auto"
+                                className="border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 w-full"
                             >
                                 <option value="all">All Status</option>
                                 <option value="resolved">Resolved</option>
@@ -333,7 +368,7 @@ const Feedbacks = () => {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {filteredContacts.length > 0 ? (
                                     filteredContacts.map((contact) => (
-                                        <tr key={contact.id} className="hover:bg-gray-50 transition-colors group">
+                                        <tr key={contact._id} className="hover:bg-gray-50 transition-colors group">
                                             <td className="px-3 py-4 whitespace-nowrap">
                                                 <div className="flex items-center min-w-0">
                                                     <div className="flex-shrink-0 h-8 w-8 md:h-10 md:w-10 rounded-full bg-purple-100 flex items-center justify-center">
@@ -359,12 +394,11 @@ const Feedbacks = () => {
                                                 {formatDate(contact.createdAt)}
                                             </td>
                                             <td className="px-3 py-4 whitespace-nowrap">
-                                                <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                    contact.status === 'resolved' 
-                                                        ? 'bg-green-100 text-green-800' 
-                                                        : 'bg-yellow-100 text-yellow-800'
-                                                }`}>
-                                                    {contact.status || 'Pending'}
+                                                <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${contact.isResolved === true
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-yellow-100 text-yellow-800'
+                                                    }`}>
+                                                    {contact.isResolved === true ? 'Resolved' : 'Pending'}
                                                 </span>
                                             </td>
                                             <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -376,14 +410,6 @@ const Feedbacks = () => {
                                                         title="View details"
                                                     >
                                                         <EyeIcon className="h-4 w-4 md:h-5 md:w-5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleEdit(contact)}
-                                                        disabled={contacts.loading}
-                                                        className="text-purple-600 hover:text-purple-900 p-1 md:p-1.5 rounded-md hover:bg-purple-50 transition-colors"
-                                                        title="Edit contact"
-                                                    >
-                                                        <PencilSquareIcon className="h-4 w-4 md:h-5 md:w-5" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(contact)}
@@ -415,19 +441,21 @@ const Feedbacks = () => {
 
                 {/* View Dialog */}
                 {viewDialogOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto mx-2">
+                    <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
+                        {/* Blurred background */}
+                        <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+                        <div className="relative bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto mx-2">
                             <div className="bg-purple-600 text-white p-4 rounded-t-xl flex items-center">
                                 <UserIcon className="h-6 w-6 mr-2" />
                                 <h3 className="text-lg font-semibold">Contact Details</h3>
-                                <button 
+                                <button
                                     onClick={() => setViewDialogOpen(false)}
                                     className="ml-auto text-white hover:text-gray-200"
                                 >
                                     <XMarkIcon className="h-6 w-6" />
                                 </button>
                             </div>
-                            
+
                             {selectedContact && (
                                 <div className="p-4 md:p-6">
                                     <div className="flex items-center mb-6">
@@ -441,127 +469,47 @@ const Feedbacks = () => {
                                             <p className="text-gray-500 truncate">{selectedContact.email}</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="border-t border-gray-200 pt-4 mb-4">
                                         <div className="flex items-center mb-3">
                                             <ChatBubbleLeftRightIcon className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0" />
                                             <h5 className="font-medium text-gray-900 truncate">{selectedContact.subject}</h5>
                                         </div>
-                                        
+
                                         <div className="flex items-start mb-4">
                                             <EnvelopeIcon className="h-5 w-5 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
                                             <p className="text-gray-700 break-words">{selectedContact.message}</p>
                                         </div>
-                                        
+
                                         <div className="flex items-center">
-                                            <CalendarDaysIcon className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0" />
-                                            <span className="text-gray-500">{formatDate(selectedContact.createdAt)}</span>
                                         </div>
                                     </div>
-                                    
-                                    <div className="flex justify-between items-center">
-                                        <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${
-                                            selectedContact.status === 'resolved' 
-                                                ? 'bg-green-100 text-green-800' 
-                                                : 'bg-yellow-100 text-yellow-800'
-                                        }`}>
-                                            {selectedContact.status || 'Pending'}
+
+                                    <div className="flex justify-between items-center mt-6">
+                                        <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${selectedContact.isResolved
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-yellow-100 text-yellow-800'
+                                            }`}>
+                                            {selectedContact.isResolved ? 'Resolved' : 'Pending'}
                                         </span>
-                                        <button
-                                            onClick={() => setViewDialogOpen(false)}
-                                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
-                                        >
-                                            Close
-                                        </button>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleUpdateContact}
+                                                disabled={contacts.loading}
+                                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                                            >
+                                                {selectedContact.isResolved ? 'Mark as Pending' : 'Mark as Resolved'}
+                                            </button>
+                                            <button
+                                                onClick={() => setViewDialogOpen(false)}
+                                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
+                                            >
+                                                Close
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Edit Dialog */}
-                {editDialogOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto mx-2">
-                            <div className="bg-purple-600 text-white p-4 rounded-t-xl flex items-center">
-                                <PencilSquareIcon className="h-6 w-6 mr-2" />
-                                <h3 className="text-lg font-semibold">Edit Contact</h3>
-                                <button 
-                                    onClick={() => setEditDialogOpen(false)}
-                                    className="ml-auto text-white hover:text-gray-200"
-                                >
-                                    <XMarkIcon className="h-6 w-6" />
-                                </button>
-                            </div>
-                            
-                            <form onSubmit={handleEditSubmit} className="p-4 md:p-6">
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                        <input
-                                            type="text"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                                            value={editForm.name}
-                                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                        <input
-                                            type="email"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                                            value={editForm.email}
-                                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                                        <input
-                                            type="text"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                                            value={editForm.subject}
-                                            onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                                        <textarea
-                                            rows={4}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                                            value={editForm.message}
-                                            onChange={(e) => setEditForm({ ...editForm, message: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div className="mt-6 flex justify-end gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => setEditDialogOpen(false)}
-                                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={contacts.loading}
-                                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
-                                    >
-                                        {contacts.loading && (
-                                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                                        )}
-                                        Update Contact
-                                    </button>
-                                </div>
-                            </form>
                         </div>
                     </div>
                 )}
@@ -577,11 +525,11 @@ const Feedbacks = () => {
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-900">Delete Contact</h3>
                                 </div>
-                                
+
                                 <p className="text-gray-600 mb-6">
                                     Are you sure you want to delete the contact from <strong>{selectedContact?.name}</strong>?
                                 </p>
-                                
+
                                 <div className="flex justify-end gap-3">
                                     <button
                                         onClick={() => setDeleteDialogOpen(false)}
@@ -616,11 +564,11 @@ const Feedbacks = () => {
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-900">Delete All Contacts</h3>
                                 </div>
-                                
+
                                 <p className="text-gray-600 mb-4">
-                                    Are you sure you want to delete all {contacts.data.length} contacts?
+                                    Are you sure you want to delete all {localContacts.length} contacts?
                                 </p>
-                                
+
                                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
                                     <div className="flex">
                                         <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400 mr-3 flex-shrink-0" />
@@ -631,7 +579,7 @@ const Feedbacks = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex justify-end gap-3">
                                     <button
                                         onClick={() => setDeleteAllDialogOpen(false)}

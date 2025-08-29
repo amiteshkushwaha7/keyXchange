@@ -15,7 +15,7 @@ const productAPI = {
   createProductAPI: async (data) => {
     const res = await api.post('/products/create', data);
     return res.data;
-  }, 
+  },  
 
   updateProductAPI: async ({ id, data }) => {
     const res = await api.put(`/products/${id}`, data);

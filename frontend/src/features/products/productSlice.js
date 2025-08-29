@@ -11,7 +11,7 @@ const createProductThunk = (name, apiCall) => createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data || { message: err.message });
     }
-  }
+  } 
 );
 
 // Create all thunks using the helper

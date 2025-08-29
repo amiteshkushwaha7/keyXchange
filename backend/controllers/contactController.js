@@ -18,7 +18,7 @@ const contactController = {
         }).send(res);
     }),
 
-    getContactById: catchAsync(async (req, res) => { 
+    getContactById: catchAsync(async (req, res) => {
         const contact = await Contact.findById(req.params.id);
         if (!contact) {
             throw new ApiError('Contact not found', 404);
@@ -58,7 +58,7 @@ const contactController = {
                         Thank you for contacting us. We have received your message and appreciate you taking the time to write to us.
                     </p>
                     <p style="font-size: 16px; color: #374151; line-height: 1.6;">
-                        Our team typically responds within <strong>24 business hours</strong>. During peak times, it may take slightly longer, but we will get back to you as soon as possible.
+                        Our team typically responds within <strong>48 business hours</strong>. During peak times, it may take slightly longer, but we will get back to you as soon as possible.
                     </p>
                     <div style="background: #e5e7eb; padding: 15px; border-radius: 8px; margin: 20px 0;">
                         <p style="margin: 0; font-size: 14px; color: #4b5563;">
@@ -68,7 +68,7 @@ const contactController = {
                     </div>
                     <p style="font-size: 16px; color: #374151; line-height: 1.6;">
                         If your inquiry is urgent, please don't hesitate to reach out to us directly at 
-                        <a href="mailto:support@yourcompany.com" style="color: #667eea; text-decoration: none;">support@yourcompany.com</a>.
+                        <a href="mailto:amiteshkushwaha2020@gmail.com" style="color: #667eea; text-decoration: none;">amiteshkushwaha2020@gmail.com</a>.
                     </p>
                     <p style="font-size: 16px; color: #374151; line-height: 1.6;">
                         Best regards,<br>
@@ -82,7 +82,7 @@ const contactController = {
                     </p>
                 </div>
             </div>`,
-            text: `Thank you for contacting us, ${newContact.name}. We have received your message and will respond within 24 business hours. Reference: #${newContact._id.toString().slice(-8).toUpperCase()}. For urgent matters, please contact support@yourcompany.com.`
+            text: `Thank you for contacting us, ${newContact.name}. We have received your message and will respond within 24 business hours. Reference: #${newContact._id.toString().slice(-8).toUpperCase()}. For urgent matters, please contact amiteshkushwaha2020@gmail.com.`
         };
 
         await sendEmail(contactMailOptions);
@@ -96,21 +96,69 @@ const contactController = {
 
     updateContact: catchAsync(async (req, res) => {
         const { id } = req.params;
-        const updates = req.body;
 
-        const updatedContact = await Contact.findByIdAndUpdate(id, updates, { new: true });
+        console.log(id);
 
-        if (!updatedContact) {
+        const contact = await Contact.findById(id);
+
+        if (!contact) {
             return new ApiResponse({
                 statusCode: 404,
-                message: 'Contact not found'
+                message: 'Contact not found' 
             }).send(res);
         }
+
+        const resolutionMailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: contact.email,
+            subject: `Your Inquiry Has Been Resolved | ${process.env.COMPANY_NAME || 'Our Team'}`,
+            html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); padding: 30px; text-align: center; color: white;">
+                    <h1 style="margin: 0; font-size: 24px;">Your Inquiry Has Been Resolved</h1>
+                </div>
+                <div style="padding: 30px; background: #f9fafb;">
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        Dear <strong>${contact.name}</strong>,
+                    </p>
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        Thank you for your patience. We're pleased to inform you that your inquiry has been successfully resolved.
+                    </p>
+                    <div style="background: #e5e7eb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 14px; color: #4b5563;">
+                            <strong>Reference ID:</strong> #${contact._id.toString().slice(-8).toUpperCase()}<br>
+                            <strong>Inquiry Type:</strong> ${contact.contactType}<br>
+                            <strong>Resolved On:</strong> ${new Date().toLocaleDateString()}
+                        </p>
+                    </div>
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        If you have any further questions or need additional assistance, please don't hesitate to reach out to us directly at <a href="mailto:amiteshkushwaha2020@gmail.com" style="color: #667eea; text-decoration: none;">amiteshkushwaha2020@gmail.com</a>.
+                    </p>
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        We value your feedback and would appreciate it if you could take a moment to share your experience with us.
+                    </p>
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        Best regards,<br>
+                        <strong>The ${process.env.COMPANY_NAME || 'Customer Success'} Team</strong>
+                    </p>
+                </div>
+                <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
+                    <p style="margin: 0;">
+                        This is an automated message. Please do not reply to this email.<br>
+                        © ${new Date().getFullYear()} ${process.env.COMPANY_NAME || 'Our Company'}. All rights reserved.
+                    </p>
+                </div>
+            </div>`,
+            text: `Dear ${contact.name}, your inquiry (Reference: #${contact._id.toString().slice(-8).toUpperCase()}) has been resolved on ${new Date().toLocaleDateString()}. If you have further questions, please contact us.`
+        };
+
+        await sendEmail(resolutionMailOptions);
+        await Contact.findByIdAndUpdate(contact._id, { isResolved: true });
 
         new ApiResponse({
             statusCode: 200,
             message: 'Contact updated successfully',
-            data: updatedContact
+            data: contact
         }).send(res);
     }),
 

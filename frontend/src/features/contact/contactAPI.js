@@ -21,8 +21,8 @@ const contactAPI = {
     return res.data;
   },
 
-  updateContactAPI: async (id, data) => {
-    const res = await api.put(`/contact/${id}`, data);
+  updateContactAPI: async (id) => {
+    const res = await api.put(`/contact/${id}`);
     return res.data;
   },
 

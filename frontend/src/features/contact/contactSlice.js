@@ -14,13 +14,12 @@ const createContactThunk = (name, apiCall) => createAsyncThunk(
     }
 );
 
-// Create all thunks using the helper
 export const submitContactForm = createContactThunk('submitContactForm', contactAPI.submitContactFormAPI);
 export const submitBugReport = createContactThunk('submitBugReport', contactAPI.submitBugReportAPI);
 export const getAllContacts = createContactThunk('getAllContacts', contactAPI.getAllContactsAPI);
-export const getContactById = createContactThunk('getContactById', (id) => contactAPI.getContactByIdAPI(id));
-export const updateContact = createContactThunk('updateContact', ({ id, data }) => contactAPI.updateContactAPI(id, data));
-export const deleteContact = createContactThunk('deleteContact', (id) => contactAPI.deleteContactAPI(id));
+export const getContactById = createContactThunk('getContactById', contactAPI.getContactByIdAPI);
+export const updateContact = createContactThunk('updateContact', contactAPI.updateContactAPI);
+export const deleteContact = createContactThunk('deleteContact', contactAPI.deleteContactAPI);
 export const deleteAllContacts = createContactThunk('deleteAllContacts', contactAPI.deleteAllContactsAPI);
 
 const initialState = {
@@ -182,9 +181,9 @@ const contactSlice = createSlice({
             state.contacts.message = action.payload.message || 'Contact updated successfully';
             state.contacts.success = true;
             // Update the contact in the list if it exists
-            if (state.contacts.currentContact?.id === action.payload.id) {
-                state.contacts.currentContact = action.payload;
-            }
+            // if (state.contacts.currentContact?.id === action.payload.id) {
+            //     state.contacts.currentContact = action.payload;
+            // }
         });
 
         // Delete Contact
