@@ -14,6 +14,12 @@ router.use(authMiddleware.protect);
 router.use(authMiddleware.authorize('admin'));
 
 router.route('/')
-   .get(contactController.getAllContacts);
+   .get(contactController.getAllContacts)
+   .delete(contactController.deleteAllContacts);
+
+router.route('/:id')
+  .get(contactController.getContactById)
+  .put(contactController.updateContact)
+  .delete(contactController.deleteContact);
 
 export default router;

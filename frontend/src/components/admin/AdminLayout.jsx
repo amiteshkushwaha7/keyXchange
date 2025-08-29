@@ -7,6 +7,7 @@ import {
   UsersIcon,
   TagIcon,
   ArrowLeftStartOnRectangleIcon,
+  EnvelopeIcon
 } from "@heroicons/react/24/outline";
 import LogoutButton from "../../components/layouts/LogoutButton";
 
@@ -36,6 +37,11 @@ const tabs = [
     path: "/admin/users",
     icon: TagIcon,
   },
+  {
+    name: "Feedbacks",
+    path: "/admin/feedbacks",
+    icon: EnvelopeIcon,
+  }
 ];
 
 export default function AdminLayout() {

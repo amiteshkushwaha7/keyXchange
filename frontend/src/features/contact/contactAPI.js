@@ -10,6 +10,32 @@ const contactAPI = {
     const res = await api.post('/contact/bug-report/submit', data);
     return res.data;
   },
+
+  getAllContactsAPI: async () => {
+    const res = await api.get('/contact');
+    return res.data;
+  },
+
+  getContactByIdAPI: async (id) => {
+    const res = await api.get(`/contact/${id}`);
+    return res.data;
+  },
+
+  updateContactAPI: async (id, data) => {
+    const res = await api.put(`/contact/${id}`, data);
+    return res.data;
+  },
+
+  deleteContactAPI: async (id) => {
+    const res = await api.delete(`/contact/${id}`);
+    return res.data;
+  },
+
+  deleteAllContactsAPI: async () => {
+    const res = await api.delete('/contact');
+    return res.data;
+  }
+
 };
 
-export default contactAPI;
+export default contactAPI; 

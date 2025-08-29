@@ -4,6 +4,9 @@ import ApiError from '../utils/apiError.js';
 import ApiResponse from '../utils/apiResponse.js';
 import sendEmail from '../utils/sendMail.js';
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 const contactController = {
     getAllContacts: catchAsync(async (req, res) => {
         const contacts = await Contact.find().sort('-createdAt');
@@ -12,6 +15,18 @@ const contactController = {
             statusCode: 200,
             message: 'Contacts retrieved successfully',
             data: contacts
+        }).send(res);
+    }),
+
+    getContactById: catchAsync(async (req, res) => { 
+        const contact = await Contact.findById(req.params.id);
+        if (!contact) {
+            throw new ApiError('Contact not found', 404);
+        }
+        new ApiResponse({
+            statusCode: 200,
+            message: 'Contact retrieved successfully',
+            data: contact
         }).send(res);
     }),
 
@@ -29,8 +44,45 @@ const contactController = {
         const contactMailOptions = {
             from: process.env.SENDER_EMAIL,
             to: newContact.email,
-            subject: 'Contact Form Submission',
-            text: `Thank you for reaching out, ${newContact.name}. We will get back to you soon!`
+            subject: `Thank You for Contacting ${process.env.COMPANY_NAME || 'Our Team'}`,
+            html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; color: white;">
+                    <h1 style="margin: 0; font-size: 24px;">Thank You for Reaching Out</h1>
+                </div>
+                <div style="padding: 30px; background: #f9fafb;">
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        Dear <strong>${newContact.name}</strong>,
+                    </p>
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        Thank you for contacting us. We have received your message and appreciate you taking the time to write to us.
+                    </p>
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        Our team typically responds within <strong>24 business hours</strong>. During peak times, it may take slightly longer, but we will get back to you as soon as possible.
+                    </p>
+                    <div style="background: #e5e7eb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 14px; color: #4b5563;">
+                            <strong>Reference:</strong> #${newContact._id.toString().slice(-8).toUpperCase()}<br>
+                            <strong>Submitted:</strong> ${new Date().toLocaleDateString()}
+                        </p>
+                    </div>
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        If your inquiry is urgent, please don't hesitate to reach out to us directly at 
+                        <a href="mailto:support@yourcompany.com" style="color: #667eea; text-decoration: none;">support@yourcompany.com</a>.
+                    </p>
+                    <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+                        Best regards,<br>
+                        <strong>The ${process.env.COMPANY_NAME || 'Customer Success'} Team</strong>
+                    </p>
+                </div>
+                <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
+                    <p style="margin: 0;">
+                        This is an automated message. Please do not reply to this email.<br>
+                        © ${new Date().getFullYear()} ${process.env.COMPANY_NAME || 'Our Company'}. All rights reserved.
+                    </p>
+                </div>
+            </div>`,
+            text: `Thank you for contacting us, ${newContact.name}. We have received your message and will respond within 24 business hours. Reference: #${newContact._id.toString().slice(-8).toUpperCase()}. For urgent matters, please contact support@yourcompany.com.`
         };
 
         await sendEmail(contactMailOptions);
@@ -40,7 +92,54 @@ const contactController = {
             message: 'Contact created successfully',
             data: newContact
         }).send(res);
-    })
+    }),
+
+    updateContact: catchAsync(async (req, res) => {
+        const { id } = req.params;
+        const updates = req.body;
+
+        const updatedContact = await Contact.findByIdAndUpdate(id, updates, { new: true });
+
+        if (!updatedContact) {
+            return new ApiResponse({
+                statusCode: 404,
+                message: 'Contact not found'
+            }).send(res);
+        }
+
+        new ApiResponse({
+            statusCode: 200,
+            message: 'Contact updated successfully',
+            data: updatedContact
+        }).send(res);
+    }),
+
+    deleteContact: catchAsync(async (req, res) => {
+        const { id } = req.params;
+
+        const deletedContact = await Contact.findByIdAndDelete(id);
+
+        if (!deletedContact) {
+            return new ApiResponse({
+                statusCode: 404,
+                message: 'Contact not found'
+            }).send(res);
+        }
+
+        new ApiResponse({
+            statusCode: 200,
+            message: 'Contact deleted successfully',
+            data: deletedContact
+        }).send(res);
+    }),
+
+    deleteAllContacts: catchAsync(async (req, res) => {
+        await Contact.deleteMany({});
+        new ApiResponse({
+            statusCode: 200,
+            message: 'All contacts deleted successfully'
+        }).send(res);
+    }),
 }
 
 export default contactController;

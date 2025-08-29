@@ -12,7 +12,6 @@ import BugReportComponent from './components/layouts/BugReportComponent';
 import Category from './components/layouts/Category';
 import Company from './components/layouts/Company';
 import Footer from './components/layouts/Footer'; 
-import Contact from './pages/Contact/Contact'; 
 import About from './pages/About/About';
 import PrivacyPolicy from './pages/Privacy Policy/Privacy';
 import Terms from './pages/T&C/T&C';
@@ -29,8 +28,7 @@ import Home from './pages/Home/Home';
 import ProductDetails from './pages/Products/ProductDetails';
 import NotFound from './pages/NotFound/NotFound';
 import LoadingScreen from './components/common/LoadingScreen';
-
-// import CreateOrder from './pages/Order/CreateOrder';
+import Contact from './pages/Contact/Contact';
 
 // User components
 import PrivateRoute from './routes/PrivateRoute';
@@ -48,6 +46,7 @@ import AdminOrderDetails from './components/admin/Order/AdminOrderDetails';
 import Customers from './pages/Admin/Customers';
 import CustomerDetails from './components/admin/Customer/CustomerDetails';
 import Users from './pages/Admin/Users';
+import Feedbacks from './pages/Admin/Feedbacks';
 
 function App() {
   const dispatch = useDispatch();
@@ -111,6 +110,7 @@ function App() {
             <Route path="customers/:customerId" element={<CustomerDetails />} />
             <Route path="users" element={<Users />} />
             <Route path="users/:id" element={<Users />} />
+            <Route path="feedbacks" element={<Feedbacks />} />
           </Route>
         </Route>
 
