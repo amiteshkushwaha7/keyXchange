@@ -62,7 +62,7 @@ const productSchema = new mongoose.Schema(
       url: String,
       public_id: String
     }],
-    expiryDate: {
+    expiryDate: { 
       type: Date,
       required: [true, 'Expire date is required'],
     },
