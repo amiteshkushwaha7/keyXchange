@@ -136,18 +136,6 @@ const ProductDetails = () => {
               {/* Price and Rating */}
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-3xl font-bold text-purple-700">₹{product.price}</span>
-                {product.rating && (
-                  <div className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
-                    {[...Array(5)].map((_, i) => (
-                      i < Math.floor(product.rating) ? 
-                        <FaStar key={i} className="text-yellow-400 ml-1" /> : 
-                        <FaRegStar key={i} className="text-yellow-400 ml-1" />
-                    ))}
-                    <span className="text-gray-700 ml-2 text-sm font-medium">
-                      {product.rating.toFixed(1)}
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* Delivery and Return Info */}

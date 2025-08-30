@@ -19,8 +19,9 @@ const Order = () => {
   const dispatch = useDispatch();
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const { orders = [], loading = false } = useSelector((state) => state.orders || {});
+  const safeOrders = Array.isArray(orders) ? orders : [];
   const [currentPage, setCurrentPage] = useState(1);
-  const [ordersPerPage] = useState(3); // Reduced to 3 for better fit in layout
+  const [ordersPerPage] = useState(3);
 
   useEffect(() => {
     dispatch(getMyOrders());
@@ -29,8 +30,8 @@ const Order = () => {
   // Pagination logic
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
-  const totalPages = Math.ceil(orders.length / ordersPerPage);
+  const currentOrders = safeOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const totalPages = Math.ceil(safeOrders.length / ordersPerPage);
 
   // Function to generate page numbers
   const getPageNumbers = () => {
