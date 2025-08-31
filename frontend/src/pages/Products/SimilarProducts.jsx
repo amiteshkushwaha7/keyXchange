@@ -62,23 +62,8 @@ const SimilarProducts = ({ productId }) => {
             </div>
             <div className="p-5">
                 <h3 className="font-semibold text-gray-900 line-clamp-1 mb-1">{product.title}</h3>
-                
-                {/* Rating */}
-                {product.rating && (
-                    <div className="flex items-center mb-2">
-                        <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                                i < Math.floor(product.rating) ? 
-                                    <FaStar key={i} className="text-yellow-400 text-xs" /> : 
-                                    <FaRegStar key={i} className="text-yellow-400 text-xs" />
-                            ))}
-                        </div>
-                        <span className="text-gray-700 text-xs ml-1">
-                            {product.rating.toFixed(1)}
-                        </span>
-                    </div>
-                )}
-                
+                <h5 className="font-medium text-sm text-gray-700 line-clamp-1 mb-1">{product.subtitle}</h5>
+
                 <div className="flex justify-between items-center mt-3">
                     <div>
                         <span className="font-bold text-purple-700">₹{product.price}</span>

@@ -19,7 +19,7 @@ router.route('/create')
   .post(orderController.createOrder);
 
 router.route('/verify-payment')
-  .post(orderController.verifyPayment);
+  .post(orderController.verifyPayment); 
 
 router.route('/:id/status')
   .patch(authMiddleware.authorize('admin'), orderController.updateOrderStatus);

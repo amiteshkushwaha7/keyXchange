@@ -11,7 +11,7 @@ const orderAPI = {
     return res.data;
   },
   
-  deleteOrderAPI: async (id) => {
+  deleteOrderAPI: async (id) => { 
     const res = await api.delete(`/orders/${id}`);
     return res.data;
   },  
