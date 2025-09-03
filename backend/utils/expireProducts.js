@@ -3,7 +3,7 @@ import Product from '../models/Product.js';
 
 // Runs every day at midnight
 const markExpiredProducts = () => {
-    cron.schedule('7 10 * * *', async () => {
+    cron.schedule('11 10 * * *', async () => {
         try {
             // Use UTC for consistent date comparison
             const now = new Date();
