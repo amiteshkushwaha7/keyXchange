@@ -3,9 +3,8 @@ import Product from '../models/Product.js';
 
 // Runs every day at midnight
 const markExpiredProducts = () => {
-    cron.schedule('11 10 * * *', async () => {
+    cron.schedule('1 0 * * *', async () => {
         try {
-            // Use UTC for consistent date comparison
             const now = new Date();
             const startOfTodayUTC = new Date(Date.UTC(
                 now.getUTCFullYear(), 
@@ -24,15 +23,13 @@ const markExpiredProducts = () => {
                     $set: { 
                         usageLimit: 0, 
                         isSold: true, 
-                        isActive: false,
-                        expiredAt: new Date() // Add timestamp for debugging
+                        isActive: false
                     } 
                 }
             );
             
             console.log('Expired products updated:', result.modifiedCount);
             
-            // Debug: Check what products should have been expired
             const expiredProducts = await Product.find({
                 expiryDate: { $lt: startOfTodayUTC },
                 isActive: true
