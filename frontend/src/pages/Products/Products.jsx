@@ -143,8 +143,8 @@ const Products = () => {
   const activeProducts = products.filter(product => 
     product.isActive &&
     !product.isSold &&
-    product.usageLimit > 0 &&
-    new Date(product.expiryDate) > new Date()
+    product.usageLimit > 0 
+    && new Date(product.expiryDate) > new Date()
   );
 
   return (
