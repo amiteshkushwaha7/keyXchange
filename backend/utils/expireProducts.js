@@ -1,7 +1,6 @@
 import cron from 'node-cron';
 import Product from '../models/Product.js';
 
-// Runs every day at midnight
 const markExpiredProducts = () => {
     cron.schedule('1 0 * * *', async () => {
         try {
