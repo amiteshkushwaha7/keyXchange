@@ -2,7 +2,8 @@ import cron from 'node-cron';
 import Product from '../models/Product.js';
 
 const markExpiredProducts = () => {
-    cron.schedule('0 13 * * *'
+    cron.schedule('55 12 * * *'
+
 , async () => {
         try {
             
