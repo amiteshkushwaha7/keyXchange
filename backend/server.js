@@ -5,7 +5,7 @@ import markExpiredProducts from'./utils/expireProducts.js';
 
 dotenv.config();
 connectDB(); 
-markExpiredProducts();
+// markExpiredProducts();
 
 const PORT = process.env.PORT || 5000; 
 
