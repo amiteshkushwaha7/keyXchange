@@ -140,12 +140,7 @@ const Products = () => {
   };
 
   // Filter products to show only active/not sold products and expiry date > today
-  const activeProducts = products.filter(product => 
-    product.isActive &&
-    !product.isSold &&
-    product.usageLimit > 0 
-    && new Date(product.expiryDate) > new Date()
-  );
+  const activeProducts = products;
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen py-8 font-sans">
