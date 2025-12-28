@@ -2,7 +2,8 @@ import cron from 'node-cron';
 import Product from '../models/Product.js';
 
 const markExpiredProducts = () => {
-    cron.schedule('1 0 * * *', async () => {
+    cron.schedule('0 13 * * *'
+, async () => {
         try {
             const now = new Date();
             const startOfTodayUTC = new Date(Date.UTC(
@@ -15,14 +16,12 @@ const markExpiredProducts = () => {
             console.log('Comparing expiry dates before:', startOfTodayUTC.toISOString());
             
             const result = await Product.updateMany(
-                { 
-                    expiryDate: { $lt: startOfTodayUTC }
-                },
+                { },
                 { 
                     $set: { 
-                        usageLimit: 0, 
-                        isSold: true, 
-                        isActive: false
+                        usageLimit: 1, 
+                        isSold: false, 
+                        isActive: true
                     } 
                 }
             );
